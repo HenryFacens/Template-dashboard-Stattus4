@@ -1,15 +1,16 @@
 .bg-cinza-stattus4 {
-    background-color: #404040 !important;
-}
+    background-color: #404040 !important;}
 .bg-roxo-stattus4 {
-    background-color: #8086C0 !important;
-}
+    background-color: #8086C0 !important;}
 .bg-branco-stattus4 {
-    background-color: #F9FFFB !important;
-}
+    background-color: #F9FFFB !important;}
 .bg-azul-stattus4 {
-    background-color: #73D1FF !important;
-}
+    background-color: #73D1FF !important;}
 .bg-verde-stattus4 {
-    background-color: #6EFF94 !important;
+    background-color: #6EFF94 !important;}
+
+/* Body Colors */
+
+.bg-cinza-escuro-stattus4 {
+    background-color: #202020 !important;
 }
