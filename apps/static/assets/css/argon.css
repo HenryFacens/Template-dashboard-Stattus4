@@ -12658,11 +12658,12 @@ textarea[resize="horizontal"] {
       margin-left: -1.5rem;
       margin-right: -1.5rem; }
     .navbar-vertical.navbar-expand-xs .navbar-nav .nav-link {
-      padding: 0.675rem 1.5rem; }
+      padding: 0.675rem 1.5rem;
+      color: white;}
     .navbar-vertical.navbar-expand-xs .navbar-nav > .nav-item {
       margin-top: 2px; }
       .navbar-vertical.navbar-expand-xs .navbar-nav > .nav-item > .nav-link.active {
-        background: #73D1FF;
+        background: #8086C0;
         margin-right: .5rem;
         margin-left: .5rem;
         padding-left: 1rem;
