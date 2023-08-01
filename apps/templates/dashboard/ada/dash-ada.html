@@ -24,10 +24,21 @@
                         </ol>
                     </nav>
                 </div>
-                <div class="col-lg-6 col-5 text-right">
-                    <a href="#" class="btn btn-sm btn-neutral">New</a>
-                    <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+                <!-- START - template forms -->
+                <div class="col-lg-6 col-12 text-lg-right text-left">
+                    <form class="d-lg-flex d-block justify-content-lg-end justify-content-start" method="POST">
+                        {% csrf_token %}
+                        <div class="mr-2 mb-lg-0 mb-2">
+                            <label for="{{ form.date_1.id_for_label }}" class="mr-2 text-white">De:</label>
+                            {{ form.date_1 }}
+                        </div>
+                        <div class="mr-2 mb-lg-0 mb-2">
+                            <label for="{{ form.date_2.id_for_label }}" class="mr-2 text-white">Até:</label>
+                            {{ form.date_2 }}
+                        </div>
+                    </form>
                 </div>
+                <!-- END - template forms -->
             </div>
         </div>
     </div>

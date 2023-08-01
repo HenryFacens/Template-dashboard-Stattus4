@@ -1,3 +1,4 @@
+from .forms import DateForm
 from django import template
 from django.views import View
 from django.urls import reverse
@@ -7,11 +8,14 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 
+
 class Fluid(View):
 
     def get(self, request):
 
         context = {}
+
+        context['form'] = DateForm()
 
         return render(request, 'dashboard/fluid/dash-fluid.html', context)
 
@@ -19,8 +23,15 @@ class Fluid(View):
 
         context = {}
 
+        form = DateForm(request.POST)
+
+        if form.is_valid():
+            request.POST.get('')
+        else:
+            context['errors'] = form.errors
+
         return JsonResponse(context)
-    
+
 
 class Ada(View):
 
@@ -28,11 +39,20 @@ class Ada(View):
 
         context = {}
 
+        context['form'] = DateForm()
+
         return render(request, 'dashboard/ada/dash-ada.html', context)
 
     def post(self, request):
 
         context = {}
+
+        form = DateForm(request.POST)
+
+        if form.is_valid():
+            request.POST.get('')
+        else:
+            context['errors'] = form.errors
 
         return JsonResponse(context)
 
