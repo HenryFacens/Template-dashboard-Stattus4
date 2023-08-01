@@ -26,7 +26,7 @@ class Fluid(View):
 def index(request):
     context = {'segment': 'index'}
 
-    html_template = loader.get_template('home/index.html')
+    html_template = loader.get_template('dashboard/fluid/dash-fluid.html')
     return HttpResponse(html_template.render(context, request))
 
 
