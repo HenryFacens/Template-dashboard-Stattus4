@@ -20,6 +20,21 @@ class Fluid(View):
         context = {}
 
         return JsonResponse(context)
+    
+
+class Ada(View):
+
+    def get(self, request):
+
+        context = {}
+
+        return render(request, 'dashboard/ada/dash-ada.html', context)
+
+    def post(self, request):
+
+        context = {}
+
+        return JsonResponse(context)
 
 
 @login_required(login_url="/login/")
