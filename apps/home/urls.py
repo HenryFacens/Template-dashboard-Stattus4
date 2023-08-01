@@ -2,6 +2,7 @@ from apps.home import views
 from django.urls import path, re_path
 from apps.home.views import Fluid, Ada
 from apps.boletim.views import Boletim_fluid
+
 urlpatterns = [
     # Dashboards
     path("/dash-fluid", Fluid.as_view(), name="dash-fluid"),

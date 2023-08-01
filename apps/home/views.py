@@ -60,6 +60,7 @@ class Ada(View):
 @login_required(login_url="/login/")
 def index(request):
     context = {'segment': 'index'}
+    context['form'] = DateForm()
 
     html_template = loader.get_template('dashboard/fluid/dash-fluid.html')
     return HttpResponse(html_template.render(context, request))
