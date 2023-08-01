@@ -1,13 +1,25 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
-
 from django import template
+from django.views import View
+from django.urls import reverse
+from django.template import loader
+from django.shortcuts import render
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import loader
-from django.urls import reverse
+
+class Fluid(View):
+
+    def get(self, request):
+
+        context = {}
+
+        return render(request, 'dashboard/fluid/dash-fluid.html', context)
+
+    def post(self, request):
+
+        context = {}
+
+        return JsonResponse(context)
 
 
 @login_required(login_url="/login/")
@@ -21,8 +33,6 @@ def index(request):
 @login_required(login_url="/login/")
 def pages(request):
     context = {}
-    # All resource paths end in .html.
-    # Pick out the html file name from the url. And load that template.
     try:
 
         load_template = request.path.split('/')[-1]
