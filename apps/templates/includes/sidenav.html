@@ -4,7 +4,7 @@
   <div class="scrollbar-inner">
     <!-- Brand -->
     <div class="sidenav-header  align-items-center">
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand" href="{% url 'dash-fluid' %}">
         <img src="/static/assets/img/stattus4/logos/dash_logo_roxo.png"
           class="navbar-brand-img" alt="Stattus4 - Roxo.">
       </a>
@@ -23,7 +23,7 @@
               <span class="nav-link-text">Dashboard</span>
             </a>
             <div class="dropdown-menu" aria-labelledby="navbar-dropdown">
-              <a class="dropdown-item" href="#">Fluid</a>
+              <a class="dropdown-item" href="{% url 'dash-fluid' %}">Fluid</a>
               <a class="dropdown-item" href="#">ADA</a>
             </div>
           </li>
