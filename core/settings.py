@@ -71,8 +71,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'LsiNgRIlcCDn',
+        'HOST': 'prod-4fluid-iot-aurora-cluster.cluster-ro-c6zjoohnrdv4.sa-east-1.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
