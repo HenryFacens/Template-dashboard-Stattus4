@@ -69,16 +69,41 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+HOST_DEFAULT_IP       = config('HOST_DEFAULT_IP')
+HOST_DEFAULT_USER     = config('HOST_DEFAULT_USER')
+HOST_DEFAULT_PASSWORD = config('HOST_DEFAULT_PASSWORD')
+HOST_DEFAULT_NAME     = config('HOST_DEFAULT_NAME')
+HOST_DEFAULT_PORT     = config('HOST_DEFAULT_PORT')
+
+HOST_SECOND_IP       = config('HOST_SECOND_IP')
+HOST_SECOND_USER     = config('HOST_SECOND_USER')
+HOST_SECOND_PASSWORD = config('HOST_SECOND_PASSWORD')
+HOST_SECOND_NAME     = config('HOST_SECOND_NAME')
+HOST_SECOND_PORT    = config('HOST_DEFAULT_PORT')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'LsiNgRIlcCDn',
-        'HOST': 'prod-4fluid-iot-aurora-cluster.cluster-ro-c6zjoohnrdv4.sa-east-1.rds.amazonaws.com',
-        'PORT': '5432',
-    }
+        'NAME': HOST_DEFAULT_NAME,
+        'USER': HOST_DEFAULT_USER,
+        'PASSWORD': HOST_DEFAULT_PASSWORD,
+        'HOST': HOST_DEFAULT_IP,
+        'PORT': HOST_DEFAULT_PORT,
+    },
+    'second_db': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': HOST_SECOND_NAME,
+        'USER': HOST_SECOND_USER,
+        'PASSWORD': HOST_SECOND_PASSWORD,
+        'HOST': HOST_SECOND_IP,
+        'PORT': HOST_SECOND_PORT,
+
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
+    },
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
