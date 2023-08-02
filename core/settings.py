@@ -90,18 +90,17 @@ DATABASES = {
         'HOST': HOST_DEFAULT_IP,
         'PORT': HOST_DEFAULT_PORT,
     },
-    'second_db': {
-        'ENGINE': 'sql_server.pyodbc',
+    'sql_server': {
+        'ENGINE': 'mssql',
         'NAME': HOST_SECOND_NAME,
         'USER': HOST_SECOND_USER,
         'PASSWORD': HOST_SECOND_PASSWORD,
         'HOST': HOST_SECOND_IP,
         'PORT': HOST_SECOND_PORT,
-
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
+            'driver': "ODBC Driver 17 for SQL Server",
         },
-    },
+    }
 }
 
 
