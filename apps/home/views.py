@@ -15,6 +15,10 @@ class Fluid(View):
 
         context = {}
 
+        a = Amostras.objects.all()[:5]
+
+        print(a)
+
         context['form'] = DateForm()
 
         return render(request, 'dashboard/fluid/dash-fluid.html', context)

@@ -92,7 +92,6 @@ class Amostras(models.Model):
 
 
 class BlobStorage(models.Model):
-    id = models.IntegerField()
     filename = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS')
     dt_created = models.DateTimeField()
 
@@ -200,7 +199,6 @@ class EquipamentosRelatorio(models.Model):
 
 
 class Historico(models.Model):
-    id = models.AutoField()
     id_amostra = models.CharField(max_length=36, blank=True, null=True)
     data = models.DateTimeField()
     dados = models.CharField(max_length=4000, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
@@ -239,7 +237,6 @@ class HistoricoAmostrasAuditoria(models.Model):
 
 
 class HistoricoDescricao(models.Model):
-    id = models.AutoField()
     descricao = models.CharField(max_length=100, db_collation='SQL_Latin1_General_CP1_CI_AS')
 
     class Meta:

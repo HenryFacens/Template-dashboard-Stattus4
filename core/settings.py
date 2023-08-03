@@ -15,7 +15,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY', default='S#perS3crEt_1122')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 # load production server from .env
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', config('SERVER', default='127.0.0.1')]
@@ -30,6 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.home', # import all apps on home file
+    'apps.banco',
+    'apps.boletim',
+    
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
