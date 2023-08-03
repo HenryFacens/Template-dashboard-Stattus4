@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
+from .data.fluid.sql_server import  get_past_three_months_data
 
 
 class Fluid(View):
@@ -14,6 +15,8 @@ class Fluid(View):
     def get(self, request):
 
         context = {}
+
+        get_past_three_months_data()
 
         context['form'] = DateForm()
 
