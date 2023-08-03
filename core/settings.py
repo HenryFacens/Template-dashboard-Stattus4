@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     'apps.home', # import all apps on home file
     'apps.banco',
     'apps.boletim',
-    
     'rest_framework',
 ]
 
@@ -85,6 +84,8 @@ HOST_SECOND_PASSWORD = config('HOST_SECOND_PASSWORD')
 HOST_SECOND_NAME     = config('HOST_SECOND_NAME')
 HOST_SECOND_PORT    = config('HOST_SECOND_PORT')
 
+# DATABASE_ROUTERS = ['apps.banco.dbrouters.DefaultDbRouter', 'apps.banco.dbrouters.SqlServerDbRouter']
+
 
 DATABASES = {
     'default': {
@@ -94,6 +95,9 @@ DATABASES = {
         'PASSWORD': HOST_DEFAULT_PASSWORD,
         'HOST': HOST_DEFAULT_IP,
         'PORT': HOST_DEFAULT_PORT,
+        'OPTIONS': {
+            'options': '-c search_path=4fluid-iot'
+        }
     },
     'sql_server': {
         'ENGINE': 'mssql',
@@ -104,6 +108,7 @@ DATABASES = {
         'PORT': HOST_SECOND_PORT,
         'OPTIONS': {
             'driver': "SQL Server Native Client 11.0",
+            'options': '-c search_path=dbo',
         },
     }
 }

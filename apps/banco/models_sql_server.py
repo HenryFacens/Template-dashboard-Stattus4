@@ -19,7 +19,7 @@ class AmostraFoto(models.Model):
 
 
 class Amostras(models.Model):
-    id_amostra = models.CharField(max_length=36)
+    id_amostra = models.CharField(max_length=36, primary_key=True)
     dt_amostra = models.DateTimeField(blank=True, null=True)
     id_sensor = models.CharField(max_length=200, db_collation='SQL_Latin1_General_CP1_CI_AS', blank=True, null=True)
     dt_auditoria = models.DateTimeField(blank=True, null=True)

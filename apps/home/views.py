@@ -1,3 +1,4 @@
+from .teste import print_first_five
 from .forms import DateForm
 from django import template
 from django.views import View
@@ -15,9 +16,7 @@ class Fluid(View):
 
         context = {}
 
-        a = Amostras.objects.all()[:5]
-
-        print(a)
+        print_first_five()
 
         context['form'] = DateForm()
 
