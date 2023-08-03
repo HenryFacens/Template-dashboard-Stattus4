@@ -15,7 +15,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY', default='S#perS3crEt_1122')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 # load production server from .env
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', config('SERVER', default='127.0.0.1')]
@@ -79,7 +79,8 @@ HOST_SECOND_IP       = config('HOST_SECOND_IP')
 HOST_SECOND_USER     = config('HOST_SECOND_USER')
 HOST_SECOND_PASSWORD = config('HOST_SECOND_PASSWORD')
 HOST_SECOND_NAME     = config('HOST_SECOND_NAME')
-HOST_SECOND_PORT    = config('HOST_DEFAULT_PORT')
+HOST_SECOND_PORT    = config('HOST_SECOND_PORT')
+
 
 DATABASES = {
     'default': {
@@ -98,10 +99,12 @@ DATABASES = {
         'HOST': HOST_SECOND_IP,
         'PORT': HOST_SECOND_PORT,
         'OPTIONS': {
-            'driver': "ODBC Driver 17 for SQL Server",
+            'driver': "SQL Server Native Client 11.0",
         },
     }
 }
+
+DATABASE_CONNECTION_POOLING = False
 
 
 # Password validation
