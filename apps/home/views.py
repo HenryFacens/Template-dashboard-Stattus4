@@ -15,12 +15,15 @@ class Fluid(View):
     def get(self, request):
 
         context = {}
-
-        get_past_three_months_data()
-
+        dados = {}
+    
+        context = {
+            'grupos': dados,
+        }
+        
         context['form'] = DateForm()
 
-        return render(request, 'dashboard/fluid/dash-fluid.html', context)
+        return render(request, 'dashboard/fluid/base/dash-fluid.html', context)
 
     def post(self, request):
 
@@ -65,7 +68,7 @@ def index(request):
     context = {'segment': 'index'}
     context['form'] = DateForm()
 
-    html_template = loader.get_template('dashboard/fluid/dash-fluid.html')
+    html_template = loader.get_template('dashboard/fluid/base/dash-fluid.html')
     return HttpResponse(html_template.render(context, request))
 
 
