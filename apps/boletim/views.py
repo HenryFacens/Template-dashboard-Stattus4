@@ -2,7 +2,7 @@ from django.views import View
 from django.shortcuts import render
 from django.http import JsonResponse
 from apps.home.forms import DateForm
-from apps.home.data.fluid.sql_server import  get_past_three_months_data
+from apps.home.data.fluid.sql_server import get_amostras_status
 
 
 class Boletim_fluid(View):
@@ -10,10 +10,9 @@ class Boletim_fluid(View):
     def get(self, request):
 
         context = {}
+        dados = {}
 
-        dados = get_past_three_months_data()
 
-        print(dados)
         context = {
             'grupos': dados,
         }

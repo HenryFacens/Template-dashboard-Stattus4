@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
-from .data.fluid.sql_server import  get_past_three_months_data
+from .data.fluid.sql_server import  get_amostras_status, get_dti_dtf
 
 
 class Fluid(View):
@@ -16,7 +16,10 @@ class Fluid(View):
 
         context = {}
         dados = {}
-    
+        print(get_amostras_status())
+        
+        
+
         context = {
             'grupos': dados,
         }
