@@ -16,7 +16,7 @@ class Fluid(View):
 
         context = {}
         dados = {}
-        print(get_amostras_status())
+        get_amostras_status()
         
         
 

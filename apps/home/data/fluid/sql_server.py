@@ -32,16 +32,7 @@ def get_dti_dtf():
 def get_amostras_status():
 
     clientes = get_cliente_ativos()
-    
-    # Cria um dicionário mapeando id_cliente para razao_social
-    dict_clientes = {cliente[0]: cliente[1] for cliente in clientes}
-    
-    # Dicionário para mapear números dos meses para seus nomes em português
-    meses = {
-        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
-        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
-        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
-    }
+
 
     lista_ids_clientes = [str(cliente[0]) for cliente in clientes]
     ids_clientes_str = ",".join(lista_ids_clientes)
@@ -86,12 +77,57 @@ def get_amostras_status():
         """)
         
         tipo_vazamento = cursor.fetchall()
-    
-    # Substitui o número do mês pelo nome do mês e id_cliente por razao_social
-    tipo_vazamento = [
-        (dict_clientes[row[0]], meses[row[1]], row[2], row[3]) for row in tipo_vazamento
-    ]
 
-    print(tipo_vazamento)
+    total_amostras_results = get_total_amostras_por_mes(start_str, end_str)
+
+    merged_results = mesclar_resultados(tipo_vazamento, total_amostras_results,clientes)
+
     return tipo_vazamento
 
+def get_total_amostras_por_mes(start_date, end_date):
+
+    
+    total_amostras_results = []
+
+    with connections['sql_server'].cursor() as cursor:
+            cursor.execute(f"""
+            SELECT 
+                id_cliente,
+                MONTH(dt_amostra) AS Mes,
+                COUNT(id_amostra) as total_de_amostras 
+            FROM 
+                devstattus4_4fluid.dbo.amostras 
+            WHERE 
+                dt_amostra BETWEEN '{start_date}' AND '{end_date}'
+            GROUP BY
+                id_cliente,
+                MONTH(dt_amostra)
+            ORDER BY
+                id_cliente,
+                MONTH(dt_amostra);
+    """)
+            
+            results = cursor.fetchall()
+            total_amostras_results.extend(results)
+    return total_amostras_results
+
+def mesclar_resultados(tipo_vazamento, total_amostras_results,clientes):
+
+    dict_clientes = {id_cliente: razao for id_cliente, razao in clientes}
+
+    meses = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio',
+        6: 'Junho', 7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro',
+        11: 'Novembro', 12: 'Dezembro'
+    }
+
+    # Criar um dicionário com (id_cliente, mês) como chave e total_de_amostras como valor
+    dict_total_amostras = {(id_cliente, mes): total for id_cliente, mes, total in total_amostras_results}
+
+    # Criar a lista mesclada
+    merged_results = [
+        (dict_clientes[id_cliente], meses[mes], classificacao, count, dict_total_amostras.get((id_cliente, mes), None))
+        for id_cliente, mes, classificacao, count in tipo_vazamento
+    ]
+    print(merged_results)
+    return merged_results
