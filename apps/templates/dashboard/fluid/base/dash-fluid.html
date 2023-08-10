@@ -1,6 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% load custom_filters %}
-{% load humanize %}
+
 {% block title %} Dashboard {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
@@ -49,53 +48,7 @@
     </div>
 </div>
 
-<div class="card" style="max-height: 600px; margin: 20px;">
-    <div class="table-responsive" style="overflow-x: hidden;">
-        <table class="table align-items-center mb-0">
-            <thead>
-                <tr>
-                    <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7">Cliente</th>
-                    {% for mes in datas %}
-                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">{{ mes }}</th>
-                    {% endfor %}
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cliente, meses in grupos.items %}
-                    <tr>
-                        <td>
-                            <strong>{{ cliente }}</strong>
-                        </td>
-                        
-                        {% for mes in datas %}
-                            <td>
-                                {% with mes_data=meses|get_item:mes %}
-                                    {% if mes_data %}
-                                    <strong>Total de Coletas: {{ mes_data|get_item:"Total de Coletas"|intcomma|default:"-" }}</strong><br>
-                                    <strong>Pontos Confirmados: {{ mes_data|get_item:"Pontos Confirmados"|intcomma|default:"-" }}</strong><br>
-                                    <strong>Pontos Não Confirmados: {{ mes_data|get_item:"Pontos Não Confirmados"|intcomma|default:"-" }}</strong><br>
-                                    <strong>Pendentes: {{ mes_data|get_item:"Pendente"|intcomma|default:"-" }}</strong><br>
-                                    <strong>Acurácia: {{ mes_data|get_item:"acuracia"|floatformat:2|default:"-" }}</strong><br>                                    
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                        {% endfor %}
-                        
-                        <td class="align-middle">
-                            <button class="btn btn-link text-secondary mb-0">
-                                <i class="fa fa-ellipsis-v text-xs" aria-hidden="true"></i>
-                            </button>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
+{% include "dashboard/fluid/context/tabela-fluid.html" %}
 
 {% endblock content %}
 
