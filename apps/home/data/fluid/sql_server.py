@@ -2,6 +2,9 @@ from django.db import connections
 from itertools import groupby
 import datetime
 
+
+# DashBoard Fluid
+
 def get_cliente_ativos():
     with connections['sql_server'].cursor() as cursor:
         cursor.execute(""" 
@@ -128,10 +131,8 @@ def mesclar_resultados(tipo_vazamento, total_amostras_results,clientes):
         11: 'Novembro', 12: 'Dezembro'
     }
 
-    # Criar um dicionário com (id_cliente, mês) como chave e total_de_amostras como valor
     dict_total_amostras = {(id_cliente, mes): total for id_cliente, mes, total in total_amostras_results}
 
-    # Criar a lista mesclada
     merged_results = [
         (dict_clientes[id_cliente], meses[mes], classificacao, count, dict_total_amostras.get((id_cliente, mes), None))
         for id_cliente, mes, classificacao, count in tipo_vazamento
@@ -139,14 +140,12 @@ def mesclar_resultados(tipo_vazamento, total_amostras_results,clientes):
     return merged_results
 
 def calcular_porcentagem(payload):
-    # Agrupar por cliente e mês
     data_grouped = {}
     for cliente, mes, tipo, count, total in payload:
         if (cliente, mes) not in data_grouped:
             data_grouped[(cliente, mes)] = {}
         data_grouped[(cliente, mes)][tipo] = count
 
-    # Calcular a porcentagem para cada grupo
     porcentagens = {}
     for (cliente, mes), values in data_grouped.items():
         sum_values = values.get('Ponto Não Confirmado', 0) + values.get('Pontos Confirmados', 0)
@@ -185,15 +184,98 @@ def organize_data(data):
     return organized_data
 
 def obter_meses_unicos(organizado):
-    # Lista de possíveis meses para filtrar
     possiveis_meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
     
     meses_unicos = set()
     
-    # Percorre os dados e pega os meses
     for cliente, dados in organizado.items():
         for mes in dados:
             if mes in possiveis_meses:
                 meses_unicos.add(mes)
     meses = list(meses_unicos)
     return meses
+
+# Boletim de Medicao Fluid
+
+def clientes_ativos_idmaster():
+    with connections['sql_server'].cursor() as cursor:
+        cursor.execute(""" 
+        SELECT id_cliente, id_cliente_master, razao_social
+        FROM devstattus4_4fluid.dbo.clientes
+        WHERE ativo = 1;
+                       """)
+        clientes_ativos = cursor.fetchall()
+
+    return clientes_ativos
+
+def group_clients():
+    clientes = clientes_ativos_idmaster()
+
+    master_clients = {item[0]: {"name": item[2], "sub_clients": []} for item in clientes if item[1] is None and item[0] != 1}
+    
+    # Create a default group for clients without a master
+    master_clients["default"] = {"name": "Sem Cliente Master", "sub_clients": []}
+    
+    for item in clientes:
+        id_cliente, id_cliente_master, razao_social = item
+
+        # Skip "Cliente Demonstração"
+        if id_cliente == 1:
+            continue
+
+        if id_cliente_master:
+            if id_cliente_master in master_clients:
+                master_clients[id_cliente_master]["sub_clients"].append((id_cliente, razao_social))
+            else:
+                # Em casos onde o cliente master ainda não foi adicionado ao dicionário (ordem invertida)
+                master_clients["default"]["sub_clients"].append((id_cliente, razao_social))
+        else:
+            master_clients["default"]["sub_clients"].append((id_cliente, razao_social))
+
+    # Remove the default group if it's empty
+    if not master_clients["default"]["sub_clients"]:
+        del master_clients["default"]
+
+    print(master_clients)
+    return master_clients
+
+def total_de_coletas(id_cliente, date_1, date_2):
+
+    print(id_cliente)
+    print(date_1)
+    print(date_2)
+
+    with connections['sql_server'].cursor() as cursor:
+        cursor.execute(""" 
+            SELECT 
+                id_cliente,
+                CAST(dt_amostra AS DATE) AS Dia,
+                COUNT(id_amostra) as total_de_amostras 
+            FROM 
+                devstattus4_4fluid.dbo.amostras 
+            WHERE 
+                id_cliente = %s AND
+                dt_amostra BETWEEN %s AND %s
+            GROUP BY
+                id_cliente,
+                CAST(dt_amostra AS DATE)
+            ORDER BY
+                id_cliente,
+                CAST(dt_amostra AS DATE);
+                       """, [id_cliente, date_1, date_2])
+        total_de_coletas = cursor.fetchall()
+
+    print(total_de_coletas)
+    coletas_totais_str = [(tup[0], tup[1].strftime('%Y-%m-%d'), tup[2]) for tup in total_de_coletas]
+    return total_de_coletas
+
+def classificao_boletim(id_cliente, date_1, date_2):
+    pass
+    # with connections['sql_server'].cursor() as cursor:
+    #         cursor.execute(""" 
+
+    #                    """, [id_cliente, date_1, date_2])
+            
+    #         total_de_coletas = cursor.fetchall()
+    
+    # return total_de_coletas

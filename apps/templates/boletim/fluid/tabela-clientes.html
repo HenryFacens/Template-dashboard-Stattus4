@@ -1,42 +1,42 @@
-<div class="container">
-    <div class="row justify-content-center">
-        <!-- Coluna responsiva para o cartão de clientes -->
-        <div class="col-12 col-md-6 col-lg-4 mx-auto">
-            <div class="card">
-                <div class="card-header bg-cinza-stattus4 text-white">
-                    Clientes
-                </div>
-                <div class="accordion" id="accordionExample" style="max-height: 400px; overflow-y: auto;">
-                    {% for month, clientes_master in grupos.items %}
-            
-                        {% for master_id, data in clientes_master.items %}
-            
-                            <div class="card-header" id="heading{{ forloop.parentloop.counter }}{{ forloop.counter }}">
+<form method="post">
+    {% csrf_token %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- Coluna responsiva para o cartão de clientes -->
+            <div class="col-12 col-md-6 col-lg-4 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-cinza-stattus4 text-white">
+                        Clientes
+                    </div>
+                    <div class="accordion" id="accordionExample" style="max-height: 400px; overflow-y: auto;">
+                        
+                        {% for client_id, client_data in cliente.items %}
+                            <div class="card-header" id="heading{{ forloop.counter }}">
                                 <h2 class="mb-0">
                                     <button class="btn btn-link btn-block text-left"
                                         type="button" data-toggle="collapse"
-                                        data-target="#collapse{{ forloop.parentloop.counter }}{{ forloop.counter }}"
+                                        data-target="#collapse{{ forloop.counter }}"
                                         aria-expanded="true"
-                                        aria-controls="collapse{{ forloop.parentloop.counter }}{{ forloop.counter }}">
-                                        {{ data.nome_master }}
+                                        aria-controls="collapse{{ forloop.counter }}">
+                                        {{ client_data.name }}
                                     </button>
                                 </h2>
                             </div>
-                            <div id="collapse{{ forloop.parentloop.counter }}{{ forloop.counter }}" class="collapse"
-                                aria-labelledby="heading{{ forloop.parentloop.counter }}{{ forloop.counter }}"
+                            <div id="collapse{{ forloop.counter }}" class="collapse"
+                                aria-labelledby="heading{{ forloop.counter }}"
                                 data-parent="#accordionExample">
                                     <ul class="list-group">
-                                        {% for cliente in data.clientes %}
-                                        <li class="list-group-item">
-                                            {{ cliente.razao_social }}
-                                        </li>
+                                        {% for sub_client in client_data.sub_clients %}
+                                        <li class="list-group-item btn-link" type="button" data-id="{{ sub_client.0 }}" onclick="sendClientId(this)">
+                                            {{ sub_client.1 }}
+                                        </li>                                    
                                         {% endfor %}
                                     </ul>
                             </div>
                         {% endfor %}
-                    {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</form>
