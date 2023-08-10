@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.banco',
     'apps.boletim',
     'rest_framework',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

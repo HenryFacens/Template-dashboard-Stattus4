@@ -15,12 +15,10 @@ class Fluid(View):
     def get(self, request):
 
         context = {}
-        dados = {}
-        get_amostras_status()
-        
-        
+        dados,meses_unicos = get_amostras_status()
 
         context = {
+            'datas': meses_unicos,
             'grupos': dados,
         }
         

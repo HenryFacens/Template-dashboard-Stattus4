@@ -1,0 +1,43 @@
+<div class="card">
+    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+        <table class="table align-items-center mb-0">
+            <thead>
+                <tr>
+                    <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7">Cliente</th>
+                    {% for mes in datas %}
+                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">{{ mes }}</th>
+                    {% endfor %}
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente, meses in grupos.items %}
+                    <tr>
+                        <td>{{ cliente }}</td>
+                        
+                        {% for mes in datas %}
+                            <td>
+                                {% with mes_data=meses|get_item:mes %}
+                                    {% if mes_data %}
+                                        Pontos Confirmados: {{ mes_data|get_item:"Pontos Confirmados"|default:"-" }}<br>
+                                        Pontos Não Confirmados: {{ mes_data|get_item:"Ponto Não Confirmado"|default:"-" }}<br>
+                                        Pendentes: {{ mes_data|get_item:"Pendente"|default:"-" }}<br>
+                                        Acurácia: {{ mes_data|get_item:"acuracia"|floatformat:2|default:"-" }}<br>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        {% endfor %}
+                        
+                        <td class="align-middle">
+                            <button class="btn btn-link text-secondary mb-0">
+                                <i class="fa fa-ellipsis-v text-xs" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
