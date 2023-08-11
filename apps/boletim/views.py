@@ -43,9 +43,10 @@ class Boletim_fluid(View):
             date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
             date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
 
-            coletas_totais = total_de_coletas(get_client,date1,date2)
+            coletas_totais,pontos = total_de_coletas(get_client,date1,date2)
 
             context = {
+                'pontos' : pontos,
                 't_coletas':coletas_totais, 
                 'date_1': date_1_pdf,
                 'date_2': date_2_pdf,

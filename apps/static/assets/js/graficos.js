@@ -16,9 +16,38 @@ Chart.plugins.register({
     }
 });
 
-function initChart($chartElement, labels, data) {
+function initChartbar($chartElement, labels, data, colors) {
     var ordersChart = new Chart($chartElement, {
         type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Sales',
+                data: data,
+                backgroundColor: colors, 
+                borderColor: colors,  
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            tooltips: {
+                enabled: false
+            }
+        }
+    });
+
+    $chartElement.data('chart', ordersChart);
+}
+
+
+function initChartpie($chartElement, labels, data) {
+    var ordersChart = new Chart($chartElement, {
+        type: 'pie',
         data: {
             labels: labels,
             datasets: [{
@@ -32,7 +61,7 @@ function initChart($chartElement, labels, data) {
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: false
                 }
             },
             tooltips: {

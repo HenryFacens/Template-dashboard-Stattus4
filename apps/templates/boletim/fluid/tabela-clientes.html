@@ -1,42 +1,94 @@
-<form method="post">
-    {% csrf_token %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <!-- Coluna responsiva para o cartão de clientes -->
-            <div class="col-12 col-md-6 col-lg-4 mx-auto">
+<div class="container">
+    <div class="row justify-content-center">
+        <!-- Coluna do Formulário -->
+        <div class="col-12 col-md-6 col-lg-4 mx-auto">
+            <form method="post">
+                {% csrf_token %}
                 <div class="card">
-                    <div class="card-header bg-cinza-stattus4 text-white">
+                    <div
+                        class="card-header bg-cinza-stattus4 text-white d-flex justify-content-between align-items-center">
                         Clientes
+                        <div
+                            class="input-group input-group-alternative input-group-merge buscador-lmt">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i
+                                        class="fas fa-search"></i></span>
+                            </div>
+                            <input id="clienteSearch" class="form-control" placeholder="Buscar" type="text">
+                        </div>
                     </div>
-                    <div class="accordion" id="accordionExample" style="max-height: 400px; overflow-y: auto;">
-                        
+                    <div class="accordion place-holder-clientes" id="accordionExample">
                         {% for client_id, client_data in cliente.items %}
-                            <div class="card-header" id="heading{{ forloop.counter }}">
-                                <h2 class="mb-0">
-                                    <button class="btn btn-link btn-block text-left"
+                        <div class="" id="heading{{ forloop.counter }}">
+                            <h2 class="mb-0 d-flex justify-content-between align-items-center">
+                    
+
+                                <span class="btn btn-link text-left flex-grow-1" data-id="{{ client_id }}" onclick="sendClientId(this)">
+                                    {{ client_data.name }}
+                                </span>
+                                
+
+                                <button class="btn btn-link text-left"
                                         type="button" data-toggle="collapse"
                                         data-target="#collapse{{ forloop.counter }}"
                                         aria-expanded="true"
                                         aria-controls="collapse{{ forloop.counter }}">
-                                        {{ client_data.name }}
-                                    </button>
-                                </h2>
-                            </div>
-                            <div id="collapse{{ forloop.counter }}" class="collapse"
-                                aria-labelledby="heading{{ forloop.counter }}"
-                                data-parent="#accordionExample">
-                                    <ul class="list-group">
-                                        {% for sub_client in client_data.sub_clients %}
-                                        <li class="list-group-item btn-link" type="button" data-id="{{ sub_client.0 }}" onclick="sendClientId(this)">
-                                            {{ sub_client.1 }}
-                                        </li>                                    
-                                        {% endfor %}
-                                    </ul>
-                            </div>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapse{{ forloop.counter }}" class="collapse"
+                             aria-labelledby="heading{{ forloop.counter }}"
+                             data-parent="#accordionExample">
+                            <ul class="list-group">
+                                {% for sub_client in client_data.sub_clients %}
+                                <li class="list-group-item btn-link"
+                                    type="button" data-id="{{ sub_client.0 }}"
+                                    onclick="sendClientId(this)">
+                                    {{ sub_client.1 }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                         {% endfor %}
+                    </div>
+                                      
+                </div>
+            </form>
+        </div>
+
+        <!-- Gráfico de Barras -->
+        <div class="col-12 col-md-6 col-lg-8 mx-auto">
+            <div class="card mb-3">
+                <div class="card-body p-3">
+                    <div class="chart">
+                        <canvas id="bar-chart-amostras" class="chart-canvas"
+                            height="300px"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Gráfico de Linha -->
+        <div class="col-12 col-md-6 col-lg-6 mx-auto">
+            <div class="card mb-3">
+                <div class="card-body p-3">
+                    <div class="chart">
+                        <canvas id="pie-chart" class="chart-canvas"
+                            height="300px"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Gráfico de Pizza -->
+        <div class="col-12 col-md-6 col-lg-6 mx-auto">
+            <div class="card mb-3">
+                <div class="card-body p-3">
+                    <div class="chart">
+                        <canvas id="bar-chart-pontos" class="chart-canvas"
+                            height="300px"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</form>
+</div>

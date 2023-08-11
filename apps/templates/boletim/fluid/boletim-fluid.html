@@ -7,7 +7,7 @@
 
 {% block content %}
 
-<div class="header bg-cinza-escuro-stattus4 pb-6">
+<div class="header bg-cinza-escuro-stattus4 pb-3">
     <div class="container-fluid">
         <div class="header-body">
             <div class="row align-items-center py-4">
@@ -26,7 +26,7 @@
                 </div>
                 <!-- START - template forms -->
                 <div class="col-lg-6 col-12 text-lg-right text-left">
-                    <form class="d-lg-flex d-block justify-content-lg-end justify-content-start" method="POST">
+                    <form class="d-lg-flex d-block justify-content-lg-end justify-content-start align-items-center" method="POST">
                         {% csrf_token %}
                         <div class="mr-2 mb-lg-0 mb-2">
                             <label for="{{ form.date_1.id_for_label }}" class="mr-2 text-white">De:</label>
@@ -36,7 +36,10 @@
                             <label for="{{ form.date_2.id_for_label }}" class="mr-2 text-white">Até:</label>
                             {{ form.date_2 }}
                         </div>
-                    </form>
+                        <div class="mr-2 mb-lg-0 mb-2">
+                            <a href="#" class="btn bg-gradient-primary btn-lg active text-white btn-pdf" role="button" aria-pressed="true">PDF</a>
+                        </div>
+                    </form>                    
                 </div>
                 <!-- END - template forms -->
             </div>
@@ -45,15 +48,8 @@
 </div>
 
 {% include 'boletim/fluid/tabela-clientes.html' %}
-<div class="container">
-    <div class="card mb-3">
-        <div class="card-body p-3">
-        <div class="chart">
-            <canvas id="bar-chart" class="chart-canvas" height="300px"></canvas>
-        </div>
-        </div>
-    </div>
-</div>
+
+
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->

@@ -28,3 +28,23 @@
     color: #73D1FF !important;}
 .text-branco-stattus4 {
     color: #F9FFFB !important;}
+
+/* Boletim CSS */
+
+.place-holder-clientes{
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.btn-pdf {
+    margin-top: 30px;
+}
+.buscador-lmt {
+    width: 200px;
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 95%; /* Ou qualquer outro valor que você desejar */
+    }
+}

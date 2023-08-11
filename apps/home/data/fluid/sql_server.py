@@ -213,13 +213,11 @@ def group_clients():
 
     master_clients = {item[0]: {"name": item[2], "sub_clients": []} for item in clientes if item[1] is None and item[0] != 1}
     
-    # Create a default group for clients without a master
     master_clients["default"] = {"name": "Sem Cliente Master", "sub_clients": []}
     
     for item in clientes:
         id_cliente, id_cliente_master, razao_social = item
 
-        # Skip "Cliente Demonstração"
         if id_cliente == 1:
             continue
 
@@ -232,7 +230,6 @@ def group_clients():
         else:
             master_clients["default"]["sub_clients"].append((id_cliente, razao_social))
 
-    # Remove the default group if it's empty
     if not master_clients["default"]["sub_clients"]:
         del master_clients["default"]
 
@@ -240,6 +237,8 @@ def group_clients():
     return master_clients
 
 def total_de_coletas(id_cliente, date_1, date_2):
+
+    pontos = classificao_boletim(id_cliente, date_1, date_2)
 
     print(id_cliente)
     print(date_1)
@@ -265,17 +264,56 @@ def total_de_coletas(id_cliente, date_1, date_2):
                        """, [id_cliente, date_1, date_2])
         total_de_coletas = cursor.fetchall()
 
-    print(total_de_coletas)
-    coletas_totais_str = [(tup[0], tup[1].strftime('%Y-%m-%d'), tup[2]) for tup in total_de_coletas]
-    return total_de_coletas
+    return total_de_coletas, pontos
 
 def classificao_boletim(id_cliente, date_1, date_2):
-    pass
-    # with connections['sql_server'].cursor() as cursor:
-    #         cursor.execute(""" 
 
-    #                    """, [id_cliente, date_1, date_2])
-            
-    #         total_de_coletas = cursor.fetchall()
-    
-    # return total_de_coletas
+    with connections['sql_server'].cursor() as cursor:
+        cursor.execute(""" 
+        SELECT 
+            id_cliente,
+            MONTH(dt_amostra) AS Mes,
+            CASE 
+                WHEN v.id_relatorio IS NULL THEN 'Pendente'
+                WHEN v.tipo_vazamento = 'Sem Ponto Suspeito, ' THEN 'Ponto Não Confirmado'
+                ELSE 'Pontos Confirmados'
+            END AS ClassificacaoVazamento,
+            COUNT(*) AS Total
+        FROM (
+            SELECT id_amostra, id_cliente, seq, dt_amostra,
+                ROW_NUMBER() OVER(PARTITION BY seq ORDER BY dt_amostra DESC) AS rn
+            FROM devstattus4_4fluid.dbo.amostras
+            WHERE classificacao = N'LEAK' 
+            AND dt_amostra BETWEEN %s AND %s
+            AND id_cliente = %s
+        ) AS a
+        LEFT JOIN (
+            SELECT id_amostra, id_relatorio, 
+                ROW_NUMBER() OVER(PARTITION BY id_amostra ORDER BY id_relatorio DESC) AS rn
+            FROM devstattus4_4fluid.dbo.relatorio_amostras
+        ) AS r ON a.id_amostra = r.id_amostra
+        LEFT JOIN devstattus4_4fluid.dbo.relatorio_vazamento AS v ON r.id_relatorio = v.id_relatorio
+        WHERE a.rn = 1 AND (r.rn = 1 OR r.id_amostra IS NULL)
+        GROUP BY 
+            id_cliente,
+            MONTH(dt_amostra),
+            CASE 
+                WHEN v.id_relatorio IS NULL THEN 'Pendente'
+                WHEN v.tipo_vazamento = 'Sem Ponto Suspeito, ' THEN 'Ponto Não Confirmado'
+                ELSE 'Pontos Confirmados'
+            END
+        ORDER BY id_cliente, MONTH(dt_amostra), ClassificacaoVazamento;
+                       """, [date_1, date_2, id_cliente])
+        pontos = cursor.fetchall()
+
+    somas = {
+        'Ponto Não Confirmado': 0,
+        'Pontos Confirmados': 0,
+        'Pendente': 0
+        }
+
+    for _, _, tipo, valor in pontos:
+        if tipo in somas:
+            somas[tipo] += valor
+    print(somas)
+    return somas

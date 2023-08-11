@@ -1,10 +1,13 @@
 
-
-
-
+function getCookie(name) {
+    let value = "; " + document.cookie;
+    let parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+}
 function sendClientId(element) {
+
     var clientId = element.getAttribute('data-id');
-    var date1Value = document.getElementById('id_date_1').value; 
+    var date1Value = document.getElementById('id_date_1').value;
     var date2Value = document.getElementById('id_date_2').value;
 
     if (!clientId) {
@@ -17,6 +20,7 @@ function sendClientId(element) {
         return;
     }
 
+    console.log(clientId);
 
     fetch('/boletim-fluid/', {
         method: 'POST',
@@ -30,28 +34,57 @@ function sendClientId(element) {
             date_2: date2Value
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-
-        const labels = data.t_coletas.map(item => item[1]);
-        const dataValues = data.t_coletas.map(item => item[2]);
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            function getColorForLabel(label) {
+                switch(label) {
+                    case 'Ponto Não Confirmado':
+                        return 'red';
+                    case 'Pontos Confirmados':
+                        return 'green';
+                    case 'Pendente':
+                        return 'yellow';
+                    default:
+                        return 'gray';  // Uma cor padrão caso haja outras categorias
+                }
+            }
+            
+            const labelsAmostras = data.t_coletas.map(item => item[1]);
+            const dataValuesAmostras = data.t_coletas.map(item => item[2]);
         
-        var $chart = $('#bar-chart');
-        if ($chart.length) {
+            var $chartElementAmostras = $('#bar-chart-amostras');
+            var existingChart = $chartElementAmostras.data('chart');
+            if (existingChart) {
+                // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
+                existingChart.data.labels = labelsAmostras;
+                existingChart.data.datasets[0].data = dataValuesAmostras;
+                existingChart.update();
+            } else {
+                // Se não, inicialize um novo gráfico.
+                initChartbar($chartElementAmostras, labelsAmostras, dataValuesAmostras);
+            }
 
-        initChart($chart, labels, dataValues);
+            const labelsPontos = Object.keys(data.pontos);
+            const barColors = labelsPontos.map(getColorForLabel);
+            const dataValuesPontos = Object.values(data.pontos);
         
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
+            var $chartElementPontos = $('#bar-chart-pontos');
+            var existingChart = $chartElementPontos.data('chart');
+            if (existingChart) {
+                // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
+                existingChart.data.labels = labelsPontos;
+                existingChart.data.datasets[0].data = dataValuesPontos;
+                existingChart.data.datasets[0].backgroundColor = barColors;  // Definindo as cores aqui
+                existingChart.update();
+            } else {
+                // Se não, inicialize um novo gráfico.
+                initChartbar($chartElementPontos, labelsPontos, dataValuesPontos, barColors);
+            }
+        
 
-function getCookie(name) {
-    let value = "; " + document.cookie;
-    let parts = value.split("; " + name + "=");
-    if (parts.length == 2) return parts.pop().split(";").shift();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 }
-
