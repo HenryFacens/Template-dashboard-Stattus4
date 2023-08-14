@@ -37,7 +37,7 @@
                             {{ form.date_2 }}
                         </div>
                         <div class="mr-2 mb-lg-0 mb-2">
-                            <a href="#" class="btn bg-gradient-primary btn-lg active text-white btn-pdf" role="button" aria-pressed="true">PDF</a>
+                            <a href="{% url 'boletim-pdf-fluid' %}" class="btn bg-gradient-primary btn-lg active text-white btn-pdf" target="_blank" role="button" aria-pressed="true">PDF</a>
                         </div>
                     </form>                    
                 </div>
@@ -46,8 +46,7 @@
         </div>
     </div>
 </div>
-
-{% include 'boletim/fluid/tabela-clientes.html' %}
+{% include 'boletim/fluid/context/tabela-clientes.html' %}
 
 
 {% endblock content %}
@@ -58,6 +57,5 @@
 <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
 <script src="/static/assets/js/graficos.js"></script>
 <script src="/static/assets/js/boletimjs.js"></script>
-
 
 {% endblock javascripts %}

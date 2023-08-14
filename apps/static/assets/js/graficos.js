@@ -1,5 +1,8 @@
 Chart.plugins.register({
     afterDraw: function(chart) {
+        if (chart.config.type === 'pie') {
+            return; // Se o tipo de gráfico for 'pie', saia da função e não faça nada.
+        }
         var ctx = chart.ctx;
 
         ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
@@ -16,13 +19,13 @@ Chart.plugins.register({
     }
 });
 
-function initChartbar($chartElement, labels, data, colors) {
+function initChartbar($chartElement, labels, data, colors, legend_onoff = true ,legend = 'Sales') {
     var ordersChart = new Chart($chartElement, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Sales',
+                label: legend,
                 data: data,
                 backgroundColor: colors, 
                 borderColor: colors,  
@@ -35,6 +38,9 @@ function initChartbar($chartElement, labels, data, colors) {
                     beginAtZero: false
                 }
             },
+            legend: {
+                display: legend_onoff,
+            },
             tooltips: {
                 enabled: false
             }
@@ -44,25 +50,30 @@ function initChartbar($chartElement, labels, data, colors) {
     $chartElement.data('chart', ordersChart);
 }
 
-
-function initChartpie($chartElement, labels, data) {
+function initChartpie($chartElement, labels, data, colors,legend_onoff = true,  legend = 'Sales',legend_local = 'bottom') {
     var ordersChart = new Chart($chartElement, {
         type: 'pie',
         data: {
-            labels: labels,
+            labels: labels.map(function(label, index) {
+                return label + " (" + data[index] + ")";  // Adiciona valores aos rótulos.
+            }),
             datasets: [{
-                label: 'Sales',
+                label: legend,
                 data: data,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)', 
-                borderColor: 'rgba(75, 192, 192, 1)',  
+                backgroundColor: colors, 
+                borderColor: colors,  
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
                 y: {
-                    beginAtZero: false
+                    display: false  // Remove o eixo Y, pois não é necessário em gráficos de pizza.
                 }
+            },
+            legend: {
+                display: legend_onoff,  // Mostra a legenda.
+                position: legend_local  // Define a posição da legenda.
             },
             tooltips: {
                 enabled: false

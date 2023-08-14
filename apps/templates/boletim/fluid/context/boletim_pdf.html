@@ -1,0 +1,301 @@
+<!doctype html>
+
+<html lang="pt-br">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            rel="stylesheet">
+
+        <style>
+                    @media print {
+                        div.textarea:empty {
+                            display: none;
+                        }
+                    }
+                    .body {
+                        font-family: Arial, sans-serif;
+                    }
+                    .textarea {
+                        max-width: 881px;
+                        min-height: 100px;
+                        padding: 10px;
+                        border-radius: 5px;
+                        border: 1px solid black;
+                        resize: horizontal;
+                        flex-grow: 1;
+                    }
+                    .header-destaque {
+                        background-color: #8086C0;
+                        color: white;
+                        padding: 10px;
+                        margin-bottom: 10px;
+                    }
+                    .chart-container {
+                        border: 1px solid #8086C0;
+                        background-color: white;
+                        padding: 10px;
+                        margin-bottom: 10px;
+                    }
+                    .chart-container.smaller-chart .chart {
+                        width: 600px;
+                        height: 300px;
+                    }
+                    .chart-container.smaller-chart .chart2 {
+                        width: 300px;
+                        height: 250%px;
+                    }
+                    .chart-container.smaller-chart .chart1 {
+                        width: 900px;
+                        height: 300px;
+                    }
+                    .col-md-12{
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    #grafico_barras_coletas {
+                    height: 300px !important;
+                    width: 75% !important;
+                    }
+                    .chart1 {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    }
+                    #chart-pizza-container {
+                    max-width: 100% !important; /* Isso diminui o gráfico para 70% da sua largura original. */
+                    margin-top: 50px;
+                    margin-right: 150px;
+                    }
+
+
+                </style>
+
+        <!-- Bootstrap CSS -->
+
+        <title>Boletim</title>
+    </head>
+
+    <body>
+
+        <main>
+            <header>
+                <nav class="navbar navbar-expand-lg navbar-dark py-3 shadow-sm"
+                    style="background-color: #8086C0;">
+                    <div
+                        class="container d-flex justify-content-between align-items-center">
+                        <a class="navbar-brand" href="#">
+                            <img
+                                src="/static/assets/img/stattus4/logos/dash_logo_verde.png"
+                                width="166" height="auto"
+                                class="d-inline-block align-top"
+                                style="max-height: 76px;" alt>
+                        </a>
+                        <h1 class="text-light m-0">Boletim de Medição Mensal</h1>
+                        <div style="width:166px;"></div>
+                    </div>
+                </nav>
+            </header>
+            <div class="container mt-1">
+                <div>
+                    <div class="p-3 mb-1 rounded shadow"
+                        style="border: 1px solid black; background-color: #f8f9fa;">
+                        <div class="row client-info">
+                            <div class="col-md-3">
+                                <img
+                                    src="/static/assets/img/stattus4/logos/boletim_logo.png"
+                                    width="166" height="auto"
+                                    class="d-inline-block align-top"
+                                    style="max-height: 76px;" alt>
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <h3 class="font-weight-bold text-dark"><span
+                                        id="cliente"></span></h3>
+                            </div>
+                            <div
+                                class="col-md-3 d-flex justify-content-end align-items-center">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p class="text-muted">Período de Análise:
+                                    <span id="firstDate2"></span> até <span
+                                        id="lastDate2"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container smaller-chart rounded mb-1 bg-light p-3 shadow">
+                        <h4 class="header-destaque" style="font-size: 16px; color: white;">Histórico de Coletas</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="chart1">
+                                    <canvas id="grafico_barras_coletas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    <div
+                        class="chart-container smaller-chart rounded mb-2 bg-light p-3 shadow">
+                        <h4 class="header-destaque"
+                            style="font-size: 16px; color: white;">Classificação
+                            das Amostras</h4>
+                        <div class="row">
+                            <!-- Espaçamento à esquerda do gráfico -->
+                            <div class="col-md-3"></div>
+
+                            <!-- Coluna existente com o gráfico -->
+                            <div class="col-md-5">
+                                <div class="chart" id="chart-pizza-container">
+                                    <canvas id="grafico_pizza_amostras"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Nova coluna para os valores -->
+                            <div class="col-md-4">
+                                <!-- Tabela estilizada com tamanho de fonte menor -->
+                                <table
+                                    class="table table-sm table-striped  border rounded shadow">
+                                    <thead style="background-color: #8086C0;">
+                                        <tr>
+                                            <th scope="col" class="text-white">Classificação</th>
+                                            <th scope="col" class="text-white">Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-valores">
+                                        <tr><td>Termo 1</td><td>10</td></tr>
+                                        <tr><td>Termo 2</td><td>20</td></tr>
+                                        <tr><td>Termo 3</td><td>30</td></tr>
+                                        <tr><td>Termo 4</td><td>40</td></tr>
+                                        <tr><td>Termo 5</td><td>50</td></tr>
+                                        <tr><td>Termo 6</td><td>60</td></tr>
+                                        <tr><td>Termo 7</td><td>70</td></tr>
+                                        <tr><td>Termo 8</td><td>80</td></tr>
+                                        <tr><td>Termo 9</td><td>90</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="chart-container smaller-chart rounded mb-2 bg-light p-3 shadow"
+                        style="height: 250px;">
+                        <h4 class="header-destaque"
+                            style="font-size: 16px; color: white;">Acurácia dos
+                            Pontos Suspeitos</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="chart2">
+                                    <canvas id="grafico_barras_acuracia"></canvas>
+                                </div>
+                                <div class="col-md-4">
+                                    <!-- Tabela estilizada com tamanho de fonte menor -->
+                                    <table
+                                        class="table table-sm table-striped border rounded shadow">
+                                        <thead
+                                            style="background-color: #8086C0;">
+                                            <tr>
+                                                <th scope="col"
+                                                    class="text-white">Ponto</th>
+                                                <th scope="col"
+                                                    class="text-white">Quantidade</th>
+                                                <th scope="col"
+                                                    class="text-white">Porcentagem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabela-valores-pontos">
+                                            <tr><td>Termo 1</td><td>10</td></tr>
+                                            <tr><td>Termo 3</td><td>30</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <div class="p-3 mb-2 rounded shadow"
+                            style="border: 1px solid black; background-color: #f8f9fa;">
+                            <div class="row client-info">
+                                <div class="col-md-12">
+                                    <h3 class="font-weight-bold text-dark"
+                                        style="font-size: 16px">Amostras
+                                        pendentes de análise do cliente</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p class="text-muted">Pendentes de análise:
+                                        <span id="pendentes_value"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 mb-2 rounded shadow"
+                            style="border: 1px solid black; background-color: #f8f9fa;">
+                            <div class="row client-info">
+                                <div class="col-md-12">
+                                    <h3 class="font-weight-bold text-dark"
+                                        style="font-size: 16px">Cobrança -
+                                        Mensalidade</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="text" id="valorReais"
+                                        class="btn btn-sm btn-neutral border rounded"
+                                        placeholder="Valor">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </body>
+
+    <footer>
+        <div class="container">
+            <div class="p-3 mb-4 rounded shadow"
+                style="border: 1px solid black; background-color: #f8f9fa;">
+                <div class="row client-info align-items-center">
+                    <div class="col-md-1">
+                        <p>Observações:</p>
+                        <div name="Comentario" id="Comentario"
+                            class="textarea" contenteditable="true"
+                            placeholder="Digite seu comentário aqui..."
+                            style="width: 881px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/static/assets/vendor/chart.js/dist/Chart.min.js"></script>
+    <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
+    <script src="/static/assets/js/graficos.js"></script>
+    <script src="/static/assets/js/fluid_pdf.js"></script>
+
+</html>

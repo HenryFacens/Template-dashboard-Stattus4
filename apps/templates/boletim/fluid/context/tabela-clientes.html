@@ -17,15 +17,19 @@
                             <input id="clienteSearch" class="form-control" placeholder="Buscar" type="text">
                         </div>
                     </div>
+
                     <div class="accordion place-holder-clientes" id="accordionExample">
                         {% for client_id, client_data in cliente.items %}
                         <div class="" id="heading{{ forloop.counter }}">
                             <h2 class="mb-0 d-flex justify-content-between align-items-center">
                     
 
-                                <span class="btn btn-link text-left flex-grow-1" data-id="{{ client_id }}" onclick="sendClientId(this)">
-                                    {{ client_data.name }}
-                                </span>
+                                <span class="btn btn-link text-left flex-grow-1" 
+                                data-id="{{ client_id }}" 
+                                data-name="{{ client_data.name }}"
+                                onclick="sendClientId(this)">
+                              {{ client_data.name }}
+                          </span>
                                 
 
                                 <button class="btn btn-link text-left"
@@ -44,6 +48,7 @@
                                 {% for sub_client in client_data.sub_clients %}
                                 <li class="list-group-item btn-link"
                                     type="button" data-id="{{ sub_client.0 }}"
+                                    data-name="{{ sub_client.1 }}"
                                     onclick="sendClientId(this)">
                                     {{ sub_client.1 }}
                                 </li>

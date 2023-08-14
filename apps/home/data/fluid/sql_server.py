@@ -28,8 +28,8 @@ def get_dti_dtf():
     start_str = start_date.strftime('%Y-%m-%d %H:%M:%S')
     end_str = end_date.strftime('%Y-%m-%d %H:%M:%S')
 
-    print(start_str)
-    print(end_str)
+    # print(start_str)
+    # print(end_str)
     return start_str, end_str
 
 def get_amostras_status():
@@ -84,7 +84,7 @@ def get_amostras_status():
     total_amostras_results = get_total_amostras_por_mes(start_str, end_str)
 
     merged_results = mesclar_resultados(tipo_vazamento, total_amostras_results,clientes)
-    print(merged_results)
+    # print(merged_results)
     final = incorporar_porcentagem_ao_payload(merged_results)
 
     final_organizado = organize_data(final)
@@ -180,7 +180,7 @@ def organize_data(data):
 
         organized_data[cliente][mes][status] = valor
 
-    print(organized_data)
+    # print(organized_data)
     return organized_data
 
 def obter_meses_unicos(organizado):
@@ -233,16 +233,17 @@ def group_clients():
     if not master_clients["default"]["sub_clients"]:
         del master_clients["default"]
 
-    print(master_clients)
+    # print(master_clients)
     return master_clients
 
 def total_de_coletas(id_cliente, date_1, date_2):
 
     pontos = classificao_boletim(id_cliente, date_1, date_2)
+    classes = qnt_class(id_cliente, date_1, date_2)
 
-    print(id_cliente)
-    print(date_1)
-    print(date_2)
+    # print(id_cliente)
+    # print(date_1)
+    # print(date_2)
 
     with connections['sql_server'].cursor() as cursor:
         cursor.execute(""" 
@@ -262,9 +263,11 @@ def total_de_coletas(id_cliente, date_1, date_2):
                 id_cliente,
                 CAST(dt_amostra AS DATE);
                        """, [id_cliente, date_1, date_2])
-        total_de_coletas = cursor.fetchall()
+        coletas_totais = cursor.fetchall()
 
-    return total_de_coletas, pontos
+    coletas_totais = [(item[0], item[1].isoformat(), item[2]) if isinstance(item[1], datetime.date) else item for item in coletas_totais]
+
+    return coletas_totais, pontos, classes
 
 def classificao_boletim(id_cliente, date_1, date_2):
 
@@ -315,5 +318,31 @@ def classificao_boletim(id_cliente, date_1, date_2):
     for _, _, tipo, valor in pontos:
         if tipo in somas:
             somas[tipo] += valor
-    print(somas)
+    # print(somas)
     return somas
+
+def qnt_class(id_cliente, date_1, date_2):
+
+        with connections['sql_server'].cursor() as cursor:
+            cursor.execute(""" 
+                SELECT 
+                    id_cliente,
+                    SUM(CASE WHEN classificacao = 'FRAU' THEN 1 ELSE 0 END) AS Fraude,
+                    SUM(CASE WHEN classificacao = 'INCO' THEN 1 ELSE 0 END) AS Inconsistente,
+                    SUM(CASE WHEN classificacao = 'LEAK' THEN 1 ELSE 0 END) AS PontoSuspeito,
+                    SUM(CASE WHEN classificacao = 'LESS' THEN 1 ELSE 0 END) AS SemVazamento,
+                    SUM(CASE WHEN classificacao = 'NOAC' THEN 1 ELSE 0 END) AS SemAcesso,
+                    SUM(CASE WHEN classificacao = 'PASS' THEN 1 ELSE 0 END) AS Consumo,
+                    SUM(CASE WHEN classificacao = 'PEND' THEN 1 ELSE 0 END) AS Pendente,
+                    SUM(CASE WHEN classificacao = 'VISI' THEN 1 ELSE 0 END) AS VazamentoVisível
+                FROM 
+                    devstattus4_4fluid.dbo.amostras
+                WHERE 
+                    id_cliente = %s AND
+                    dt_amostra BETWEEN %s AND %s
+                GROUP BY 
+                    id_cliente;
+                        """, [id_cliente, date_1, date_2])
+            qnt_class = cursor.fetchall()
+        # print(qnt_class)
+        return qnt_class

@@ -7,6 +7,7 @@ function getCookie(name) {
 function sendClientId(element) {
 
     var clientId = element.getAttribute('data-id');
+    var clientName = element.getAttribute('data-name');
     var date1Value = document.getElementById('id_date_1').value;
     var date2Value = document.getElementById('id_date_2').value;
 
@@ -20,7 +21,7 @@ function sendClientId(element) {
         return;
     }
 
-    console.log(clientId);
+    console.log(clientName);
 
     fetch('/boletim-fluid/', {
         method: 'POST',
@@ -30,6 +31,7 @@ function sendClientId(element) {
         },
         body: JSON.stringify({
             id: clientId,
+            name: clientName,
             date_1: date1Value,
             date_2: date2Value
         })
@@ -37,7 +39,8 @@ function sendClientId(element) {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            function getColorForLabel(label) {
+
+            function getColorForLabelPontos(label) {
                 switch(label) {
                     case 'Ponto Não Confirmado':
                         return 'red';
@@ -62,11 +65,11 @@ function sendClientId(element) {
                 existingChart.update();
             } else {
                 // Se não, inicialize um novo gráfico.
-                initChartbar($chartElementAmostras, labelsAmostras, dataValuesAmostras);
+                initChartbar($chartElementAmostras, labelsAmostras, dataValuesAmostras,null ,false);
             }
 
             const labelsPontos = Object.keys(data.pontos);
-            const barColors = labelsPontos.map(getColorForLabel);
+            const barColorsPontos = labelsPontos.map(getColorForLabelPontos);
             const dataValuesPontos = Object.values(data.pontos);
         
             var $chartElementPontos = $('#bar-chart-pontos');
@@ -75,11 +78,63 @@ function sendClientId(element) {
                 // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
                 existingChart.data.labels = labelsPontos;
                 existingChart.data.datasets[0].data = dataValuesPontos;
-                existingChart.data.datasets[0].backgroundColor = barColors;  // Definindo as cores aqui
+                existingChart.data.datasets[0].backgroundColor = barColorsPontos;  // Definindo as cores aqui
                 existingChart.update();
             } else {
                 // Se não, inicialize um novo gráfico.
-                initChartbar($chartElementPontos, labelsPontos, dataValuesPontos, barColors);
+                initChartbar($chartElementPontos, labelsPontos, dataValuesPontos, barColorsPontos, false);
+            }
+            function getColorForLabelClasses(label) {
+                switch(label) {
+                    case 'Sem Vazamento':
+                        return 'green';
+                    case 'Ponto Suspeito':
+                        return 'red';
+                    case 'Fraude':
+                        return 'black';
+                    case 'Sem Acesso':
+                        return 'gray';
+                    case 'Consumo':
+                        return '#ADD8E6';  // Azul bebê em hexadecimal
+                    case 'Inconsistente':
+                        return 'darkblue'; // Azul escuro
+                    case 'Pendente':
+                        return 'yellow';
+                    case 'Vazamento Visível':
+                        return 'purple'; 
+                    default:
+                        return 'gray';  // Uma cor padrão caso haja outras categorias não listadas
+                }
+            }
+            
+            const [clientId, ...dataValuesClassesRaw] = data.classes[0];
+
+            const labelsClasses = ['Fraude', 'Inconsistente', 'Ponto Suspeito', 'Sem Vazamento', 'Sem Acesso', 'Consumo', 'Pendente', 'Vazamento Visível'];
+    
+            // Como você não quer o ID do cliente, não precisamos mudar labelsClasses.
+            const dataValuesClasses = dataValuesClassesRaw;
+            const barColorsClasses = labelsClasses.map(getColorForLabelClasses);
+    
+            var $chartElementClasses = $('#pie-chart');
+            var existingChart = $chartElementClasses.data('chart');
+    
+            // Função para criar rótulos com valores
+            function generateLabelsWithValues(labels, data) {
+                return labels.map(function(label, index) {
+                    return label + " (" + data[index] + ")";
+                });
+            }
+
+            // Dentro do fetch ou onde você lida com a atualização
+            if (existingChart) {
+                // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
+                existingChart.data.labels = generateLabelsWithValues(labelsClasses, dataValuesClasses);
+                existingChart.data.datasets[0].data = dataValuesClasses;
+                existingChart.data.datasets[0].backgroundColor = barColorsClasses;
+                existingChart.update();
+            } else {
+                // Se não, inicialize um novo gráfico.
+                initChartpie($chartElementClasses, labelsClasses, dataValuesClasses, barColorsClasses);
             }
         
 

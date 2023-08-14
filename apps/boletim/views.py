@@ -30,6 +30,9 @@ class Boletim_fluid(View):
         data = json.loads(request.body)
 
         get_client = data.get('id', None)
+
+        get_name = data.get('name', None)
+
         date1 = data.get('date_1', None)
         date2 = data.get('date_2', None)
 
@@ -43,9 +46,13 @@ class Boletim_fluid(View):
             date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
             date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
 
-            coletas_totais,pontos = total_de_coletas(get_client,date1,date2)
+            coletas_totais, pontos, classes = total_de_coletas(get_client,date1,date2)
+
+            print(get_name)
 
             context = {
+                'clientNm': get_name,
+                'classes' : classes,
                 'pontos' : pontos,
                 't_coletas':coletas_totais, 
                 'date_1': date_1_pdf,
@@ -53,8 +60,32 @@ class Boletim_fluid(View):
 
             }
 
+            request.session['context'] = context
+
             return JsonResponse(context)
 
         else:
             print(form.errors)
             return JsonResponse({'error': 'Invalid data'})
+        
+    def process_data(self, request):
+
+        context = request.session.get('context', None)
+
+        return context
+
+class Boletim_pdf(Boletim_fluid):
+
+    def get(self, request):
+        context = self.process_data(request)
+
+        return render(request, 'boletim/fluid/context/boletim_pdf.html', {'context': context})
+
+
+class JSON_Boletim_pdf(Boletim_fluid):
+
+    def get(self, request):
+
+        context = self.process_data(request)
+
+        return JsonResponse({'context': context})
