@@ -3,10 +3,10 @@
 <div class="card" style="max-height: 600px; margin: 20px;">
     <div class="table-responsive" style="overflow-x: hidden;">
         <table class="table align-items-center mb-0">
-            <thead>
+            <thead class="thead-light tbl-fluid">
                 <tr>
                     <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7">Cliente</th>
-                    {% for mes in datas %}
+                    {% for mes in datas|sort_months %}
                         <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">{{ mes }}</th>
                     {% endfor %}
                     <th></th>
@@ -27,7 +27,16 @@
                                     <strong>Pontos Confirmados: {{ mes_data|get_item:"Pontos Confirmados"|intcomma|default:"-" }}</strong><br>
                                     <strong>Pontos Não Confirmados: {{ mes_data|get_item:"Pontos Não Confirmados"|intcomma|default:"-" }}</strong><br>
                                     <strong>Pendentes: {{ mes_data|get_item:"Pendente"|intcomma|default:"-" }}</strong><br>
-                                    <strong>Acurácia: {{ mes_data|get_item:"acuracia"|floatformat:2|default:"-" }}</strong><br>                                    
+                                    <strong>Acurácia: {{ mes_data|get_item:"acuracia"|floatformat:2|default:"-" }}</strong>
+                                    
+                                    {% if mes_data|get_item:"acuracia" > 50 %}
+                                        <i class="ni ni-bulb-61 text-success"></i>
+                                    {% elif mes_data|get_item:"acuracia" > 20 %}
+                                        <i class="ni ni-bulb-61 text-warning"></i>
+                                    {% else %}
+                                        <i class="ni ni-bulb-61 text-danger"></i>
+                                    {% endif %}
+                                    <br>
                                     {% else %}
                                         -
                                     {% endif %}
@@ -42,7 +51,7 @@
                         </td>
                     </tr>
                 {% endfor %}
-            </tbody>
+            </tbody>            
         </table>
     </div>
 </div>

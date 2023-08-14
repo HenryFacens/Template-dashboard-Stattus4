@@ -42,7 +42,11 @@
 .buscador-lmt {
     width: 200px;
 }
-
+/* tabela do fluid */
+.tbl-fluid{
+    position: sticky;
+    top: 0;
+}
 @media (min-width: 1200px) {
     .container {
         max-width: 95%; /* Ou qualquer outro valor que você desejar */
