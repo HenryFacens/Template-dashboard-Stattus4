@@ -69,7 +69,9 @@ def index(request):
     context = {'segment': 'index'}
     context['form'] = DateForm()
 
-    html_template = loader.get_template('dashboard/fluid/base/dash-fluid.html')
+    # html_template = loader.get_template('dashboard/fluid/base/dash-fluid.html')
+    html_template = loader.get_template('layouts/base.html')
+
     return HttpResponse(html_template.render(context, request))
 
 

@@ -1,9 +1,17 @@
 {% load custom_filters %}
 {% load humanize %}
+<div class="mb-3" style="margin-left: 20px;"> <!-- Adiciona margem à esquerda para alinhar com o card -->
+    <div class="input-group input-group-alternative input-group-merge buscador-lmt">
+        <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+        </div>
+        <input id="tableSearch" class="form-control" placeholder="Buscar" type="text">
+    </div>
+</div>
 <div class="card" style="max-height: 600px; margin: 20px;">
     <div class="table-responsive" style="overflow-x: hidden;">
         <table class="table align-items-center mb-0">
-            <thead class="thead-light tbl-fluid">
+            <thead class="thead-light tbl-fluid" style="position: sticky; top: 0;">
                 <tr>
                     <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7">Cliente</th>
                     {% for mes in datas|sort_months %}
@@ -19,7 +27,7 @@
                             <strong>{{ cliente }}</strong>
                         </td>
                         
-                        {% for mes in datas %}
+                        {% for mes in datas|sort_months %}
                             <td>
                                 {% with mes_data=meses|get_item:mes %}
                                     {% if mes_data %}

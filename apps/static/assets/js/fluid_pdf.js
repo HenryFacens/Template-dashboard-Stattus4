@@ -52,7 +52,7 @@ async function fetchData() {
         const valuespontos = Object.values(dataBar);
         const $chartBarElement = $("#grafico_barras_acuracia");
         const colorspontos = ['red', 'green'];
-        initChartbar($chartBarElement, labelspontos, valuespontos, colorspontos, false);
+        initChartbar($chartBarElement, labelspontos, valuespontos, colorspontos,false);
         updateTable(dataBar);
         updatePendentesValue(pontos);
 
@@ -118,7 +118,11 @@ function updateTable(dataBar) {
     const totalValues = Object.values(dataBar).reduce((a, b) => a + b, 0);
 
     for (const [label, value] of Object.entries(dataBar)) {
-        const percentage = ((value / totalValues) * 100).toFixed(2) + '%';
+        let percentage = '0%';
+
+        if (totalValues > 0 && value !== null && !isNaN(value)) {
+            percentage = ((value / totalValues) * 100).toFixed(2) + '%';
+        }
         
         const row = tbody.insertRow();
         const cell1 = row.insertCell(0);
@@ -130,6 +134,7 @@ function updateTable(dataBar) {
         cell3.innerText = percentage;
     }
 }
+
 function updatePendentesValue(pontos) {
     const pendentesElement = document.getElementById("pendentes_value");
     pendentesElement.textContent = pontos["Pendente"];

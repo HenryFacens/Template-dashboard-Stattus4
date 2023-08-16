@@ -1,3 +1,49 @@
+function normalizeString(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+// Função para filtrar nomes dos clientes e sub-clientes
+function filterClients() {
+    let filter = normalizeString(this.value);
+
+    // Itera sobre todos os clientes
+    document.querySelectorAll('.accordion > div').forEach(function(clientContainer) {
+        let mainClientName = normalizeString(clientContainer.querySelector('[data-name]').getAttribute('data-name'));
+        let subClients = clientContainer.querySelectorAll('.list-group-item');
+        
+        let hasSubClientMatch = false;
+
+        subClients.forEach(function(subClient) {
+            let subClientName = normalizeString(subClient.getAttribute('data-name'));
+
+            if (subClientName.includes(filter)) {
+                subClient.style.display = "";
+                hasSubClientMatch = true;
+            } else {
+                subClient.style.display = "none";
+            }
+        });
+
+        // Se o nome do cliente principal ou qualquer sub-cliente corresponder, mostre o cliente principal
+        if (mainClientName.includes(filter) || hasSubClientMatch) {
+            clientContainer.style.display = "";
+        } else {
+            clientContainer.style.display = "none";
+        }
+    });
+}
+
+// Adiciona evento para filtragem ao digitar
+document.getElementById("clienteSearch").addEventListener("input", filterClients);
+
+// Adiciona evento para evitar que Enter submeta o formulário
+document.getElementById("clienteSearch").addEventListener('keydown', function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        return false;
+    }
+});
+
 
 function getCookie(name) {
     let value = "; " + document.cookie;
@@ -39,7 +85,7 @@ function sendClientId(element) {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-
+        
             function getColorForLabelPontos(label) {
                 switch(label) {
                     case 'Ponto Não Confirmado':

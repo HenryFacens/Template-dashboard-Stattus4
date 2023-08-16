@@ -26,7 +26,7 @@
                 </div>
                 <!-- START - template forms -->
                 <div class="col-lg-6 col-12 text-lg-right text-left">
-                    <form
+                    {% comment %} <form
                         class="d-lg-flex d-block justify-content-lg-end justify-content-start"
                         method="POST">
                         {% csrf_token %}
@@ -40,7 +40,7 @@
                                 class="mr-2 text-white">Até:</label>
                             {{ form.date_2 }}
                         </div>
-                    </form>
+                    </form> {% endcomment %}
                 </div>
                 <!-- END - template forms -->
             </div>
@@ -57,5 +57,40 @@
 
 <script src="/static/assets/vendor/chart.js/dist/Chart.min.js"></script>
 <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
+
+<script>
+    function normalizeString(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+    
+    function filterTableRows() {
+        let filter = normalizeString(this.value);
+    
+        // Itera sobre todas as linhas da tabela
+        document.querySelectorAll('table tbody tr').forEach(function(row) {
+            let clientNameCell = row.querySelector('td:first-child');
+            let clientName = normalizeString(clientNameCell.textContent);
+    
+            // Se o nome do cliente corresponder, mostre a linha. Caso contrário, esconda a linha.
+            if (clientName.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+    
+    // Adiciona evento para filtragem ao digitar
+    document.getElementById("tableSearch").addEventListener("input", filterTableRows);
+    
+    // Adiciona evento para evitar que Enter submeta o formulário
+    document.getElementById("tableSearch").addEventListener('keydown', function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            return false;
+        }
+    });
+    
+</script>
 
 {% endblock javascripts %}
