@@ -10,7 +10,7 @@ async function fetchData() {
 
         const data = await response.json();
         
-        console.log(data); // Aqui, você pode processar os dados conforme necessário
+        // console.log(data); // Aqui, você pode processar os dados conforme necessário
 
         const cliente = data.context.clientNm;
         document.getElementById('cliente').textContent = cliente;
@@ -23,24 +23,46 @@ async function fetchData() {
 
         //Grafico de barras
         const t_coletas = data.context.t_coletas;
-        const labelsbar = t_coletas.map(item => item[1]);
-        const databar = t_coletas.map(item => item[2]);
+
+        const sumByDate = {};
+
+        t_coletas.forEach(item => {
+            const date = item[1];
+            const value = item[2];
+
+            if (sumByDate[date]) {
+                sumByDate[date] += value;
+            } else {
+                sumByDate[date] = value;
+            }
+        });
+
+        const labelsbar = Object.keys(sumByDate).sort((a, b) => new Date(a) - new Date(b));
+        const databar = labelsbar.map(date => sumByDate[date]);
 
         const colorsbar = databar.map(() => 'rgba(54, 162, 235, 0.2)');
 
         const $chartElement = $("#grafico_barras_coletas");
-        initChartbar($chartElement, labelsbar, databar, colorsbar, true,'Coleta');
+        initChartbar($chartElement, labelsbar, databar, colorsbar, true, 'Coleta');
         
         //Grafico de pizza
         const labelsClasses = ['Fraude', 'Inconsistente', 'Ponto Suspeito', 'Sem Vazamento', 'Sem Acesso', 'Consumo', 'Pendente', 'Vazamento Visível'];
-        const dataPieRaw = data.context.classes[0];  // Considerando que este é o seu conjunto de dados
-        const [, ...dataPie] = dataPieRaw;  // Usando desestruturação para ignorar o primeiro elemento e pegar o restante
-        console.log(dataPie);
+        const dataPie= data.context.classes;
         const barColorsClasses = labelsClasses.map(getColorForLabelClasses);
         
-        const $chartPieElement = $("#grafico_pizza_amostras");  // Lembre-se de atualizar com o ID correto do seu elemento canvas
-        initChartpie($chartPieElement, labelsClasses, dataPie, barColorsClasses, 'Coleta', true, 'right');
+        const $chartPieElement = $("#grafico_pizza_amostras");
+        var existingChart = $chartPieElement.data('chart');
+        
+        if (existingChart) {
+            existingChart.data.labels = generateLabelsWithValues(labelsClasses, dataPie);
+            existingChart.data.datasets[0].data = dataPie;
+            existingChart.data.datasets[0].backgroundColor = barColorsClasses;
+            existingChart.update();
+        } else {
+            initChartpie($chartPieElement, labelsClasses, dataPie, barColorsClasses, 'Coleta', true, 'right');
+        }
         updateTableWithValues(labelsClasses, dataPie);
+        
         
         //Acuracia
         const pontos = data.context.pontos;

@@ -13,7 +13,7 @@ def get_cliente_ativos():
         WHERE ativo = 1;
                        """)
         clientes_ativos = cursor.fetchall()
-
+    print(clientes_ativos)
     return clientes_ativos
 
 
@@ -40,7 +40,7 @@ def get_amostras_status():
     lista_ids_clientes = [str(cliente[0]) for cliente in clientes]
     ids_clientes_str = ",".join(lista_ids_clientes)
     start_str, end_str = get_dti_dtf()
-
+    print(ids_clientes_str)
     with connections['sql_server'].cursor() as cursor:
 
         cursor.execute(f"""
@@ -233,20 +233,42 @@ def group_clients():
     if not master_clients["default"]["sub_clients"]:
         del master_clients["default"]
 
-    # print(master_clients)
     return master_clients
+
+def verifica_subs(id_cliente):
+    with connections['sql_server'].cursor() as cursor:
+        cursor.execute(""" 
+            SELECT 
+                id_cliente
+            FROM 
+                devstattus4_4fluid.dbo.clientes
+            WHERE 
+                id_cliente_master = %s;
+                       """, [id_cliente])
+        subs = cursor.fetchall()
+
+    subs_list = [str(item[0]) for item in subs]
+
+    # Add the original id_cliente to the front of the list
+    subs_list.insert(0, str(id_cliente))
+    
+    ids_clientes_str = ','.join(subs_list)
+    print(ids_clientes_str)
+    return ids_clientes_str
+
+
+
+from collections import defaultdict
 
 def total_de_coletas(id_cliente, date_1, date_2):
 
-    pontos = classificao_boletim(id_cliente, date_1, date_2)
-    classes = qnt_class(id_cliente, date_1, date_2)
-
-    # print(id_cliente)
-    # print(date_1)
-    # print(date_2)
+    subs = verifica_subs(id_cliente)
+    
+    pontos = classificao_boletim(subs, date_1, date_2)
+    classes = qnt_class(subs, date_1, date_2)
 
     with connections['sql_server'].cursor() as cursor:
-        cursor.execute(""" 
+        cursor.execute(f""" 
             SELECT 
                 id_cliente,
                 CAST(dt_amostra AS DATE) AS Dia,
@@ -254,25 +276,35 @@ def total_de_coletas(id_cliente, date_1, date_2):
             FROM 
                 devstattus4_4fluid.dbo.amostras 
             WHERE 
-                id_cliente = %s AND
-                dt_amostra BETWEEN %s AND %s
+                id_cliente IN ({subs}) AND
+                dt_amostra BETWEEN '{date_1}' AND '{date_2}'
             GROUP BY
                 id_cliente,
                 CAST(dt_amostra AS DATE)
             ORDER BY
                 id_cliente,
                 CAST(dt_amostra AS DATE);
-                       """, [id_cliente, date_1, date_2])
+                       """)
         coletas_totais = cursor.fetchall()
 
-    coletas_totais = [(item[0], item[1].isoformat(), item[2]) if isinstance(item[1], datetime.date) else item for item in coletas_totais]
+    # Convertendo as datas para formato ISO e agrupando os valores
+    sumByDate = defaultdict(int)
+    for item in coletas_totais:
+        id_cliente, date, total = item
+        if isinstance(date, datetime.date):
+            date = date.isoformat()
+        
+        sumByDate[(id_cliente, date)] += total
 
-    return coletas_totais, pontos, classes
+    # Convertendo de volta para a lista
+    coletas_totais_aggregated = [(id_cliente, date, total) for (id_cliente, date), total in sumByDate.items()]
 
-def classificao_boletim(id_cliente, date_1, date_2):
+    return coletas_totais_aggregated, pontos, classes
 
+
+def classificao_boletim(subs, date_1, date_2):
     with connections['sql_server'].cursor() as cursor:
-        cursor.execute(""" 
+        cursor.execute(f""" 
         SELECT 
             id_cliente,
             MONTH(dt_amostra) AS Mes,
@@ -287,8 +319,8 @@ def classificao_boletim(id_cliente, date_1, date_2):
                 ROW_NUMBER() OVER(PARTITION BY seq ORDER BY dt_amostra DESC) AS rn
             FROM devstattus4_4fluid.dbo.amostras
             WHERE classificacao = N'LEAK' 
-            AND dt_amostra BETWEEN %s AND %s
-            AND id_cliente = %s
+            AND dt_amostra BETWEEN '{date_1}' AND '{date_2}'
+            AND id_cliente IN ({subs})
         ) AS a
         LEFT JOIN (
             SELECT id_amostra, id_relatorio, 
@@ -305,26 +337,28 @@ def classificao_boletim(id_cliente, date_1, date_2):
                 WHEN v.tipo_vazamento = 'Sem Ponto Suspeito, ' THEN 'Ponto Não Confirmado'
                 ELSE 'Pontos Confirmados'
             END
-        ORDER BY id_cliente, MONTH(dt_amostra), ClassificacaoVazamento;
-                       """, [date_1, date_2, id_cliente])
+        ORDER BY MONTH(dt_amostra), ClassificacaoVazamento;
+        """)
         pontos = cursor.fetchall()
 
-    somas = {
+    somas = {                    
+                    
         'Ponto Não Confirmado': 0,
         'Pontos Confirmados': 0,
         'Pendente': 0
-        }
+    }
 
     for _, _, tipo, valor in pontos:
-        if tipo in somas:
-            somas[tipo] += valor
-    # print(somas)
+        somas[tipo] += valor
+        
     return somas
 
-def qnt_class(id_cliente, date_1, date_2):
+
+def qnt_class(subs, date_1, date_2):
+        
 
         with connections['sql_server'].cursor() as cursor:
-            cursor.execute(""" 
+            cursor.execute(f""" 
                 SELECT 
                     id_cliente,
                     SUM(CASE WHEN classificacao = 'FRAU' THEN 1 ELSE 0 END) AS Fraude,
@@ -338,11 +372,27 @@ def qnt_class(id_cliente, date_1, date_2):
                 FROM 
                     devstattus4_4fluid.dbo.amostras
                 WHERE 
-                    id_cliente = %s AND
-                    dt_amostra BETWEEN %s AND %s
+                    id_cliente IN ({subs}) AND
+                    dt_amostra BETWEEN '{date_1}' AND '{date_2}'
                 GROUP BY 
                     id_cliente;
-                        """, [id_cliente, date_1, date_2])
+                        """)
             qnt_class = cursor.fetchall()
-        # print(qnt_class)
-        return qnt_class
+
+        if not qnt_class:
+            print("No data found.")
+            return []
+
+        total_values = [0] * (len(qnt_class[0]) - 1)
+
+        for record in qnt_class:
+            for index, value in enumerate(record[1:]):
+                total_values[index] += value
+
+        return total_values
+
+
+
+
+
+

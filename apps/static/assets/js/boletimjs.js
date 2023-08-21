@@ -1,48 +1,34 @@
-function normalizeString(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-// Função para filtrar nomes dos clientes e sub-clientes
-function filterClients() {
-    let filter = normalizeString(this.value);
-
-    // Itera sobre todos os clientes
-    document.querySelectorAll('.accordion > div').forEach(function(clientContainer) {
-        let mainClientName = normalizeString(clientContainer.querySelector('[data-name]').getAttribute('data-name'));
-        let subClients = clientContainer.querySelectorAll('.list-group-item');
+document.addEventListener('DOMContentLoaded', function () {
+    const searchBox = document.getElementById('clienteSearch');
+    
+    searchBox.addEventListener('input', function () {
+        const searchQuery = this.value.toLowerCase();
         
-        let hasSubClientMatch = false;
+        // Loop through each client container
+        document.querySelectorAll('.client-container').forEach(function (clientDiv) {
+            const clientName = clientDiv.querySelector('span').textContent.toLowerCase();
+            let hasMatchingSubClient = false;
 
-        subClients.forEach(function(subClient) {
-            let subClientName = normalizeString(subClient.getAttribute('data-name'));
-
-            if (subClientName.includes(filter)) {
-                subClient.style.display = "";
-                hasSubClientMatch = true;
+            // Check each sub-client under the current client
+            const subItems = clientDiv.querySelectorAll('.list-group-item');
+            subItems.forEach(function (subItem) {
+                if (subItem.textContent.toLowerCase().includes(searchQuery)) {
+                    hasMatchingSubClient = true;
+                    subItem.style.display = ''; // show
+                } else {
+                    subItem.style.display = 'none'; // hide
+                }
+            });
+            
+            if (clientName.includes(searchQuery) || hasMatchingSubClient) {
+                clientDiv.style.display = ''; // show
             } else {
-                subClient.style.display = "none";
+                clientDiv.style.display = 'none'; // hide
             }
         });
-
-        // Se o nome do cliente principal ou qualquer sub-cliente corresponder, mostre o cliente principal
-        if (mainClientName.includes(filter) || hasSubClientMatch) {
-            clientContainer.style.display = "";
-        } else {
-            clientContainer.style.display = "none";
-        }
     });
-}
-
-// Adiciona evento para filtragem ao digitar
-document.getElementById("clienteSearch").addEventListener("input", filterClients);
-
-// Adiciona evento para evitar que Enter submeta o formulário
-document.getElementById("clienteSearch").addEventListener('keydown', function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        return false;
-    }
 });
+
 
 
 function getCookie(name) {
@@ -53,6 +39,7 @@ function getCookie(name) {
 function sendClientId(element) {
 
     var clientId = element.getAttribute('data-id');
+    console.log(clientId)
     var clientName = element.getAttribute('data-name');
     var date1Value = document.getElementById('id_date_1').value;
     var date2Value = document.getElementById('id_date_2').value;
@@ -85,7 +72,6 @@ function sendClientId(element) {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-        
             function getColorForLabelPontos(label) {
                 switch(label) {
                     case 'Ponto Não Confirmado':
@@ -98,22 +84,34 @@ function sendClientId(element) {
                         return 'gray';  // Uma cor padrão caso haja outras categorias
                 }
             }
-            
-            const labelsAmostras = data.t_coletas.map(item => item[1]);
-            const dataValuesAmostras = data.t_coletas.map(item => item[2]);
-        
+
+            // Total Coletas
+            const groupedData = data.t_coletas.reduce((acc, item) => {
+                if (!acc[item[1]]) {
+                    acc[item[1]] = item[2];
+                } else {
+                    acc[item[1]] += item[2];
+                }
+                return acc;
+            }, {});
+
+            const sortedArray = Object.entries(groupedData)
+                .sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
+            const labelsAmostras = sortedArray.map(item => item[0]);
+            const dataValuesAmostras = sortedArray.map(item => item[1]);
+
             var $chartElementAmostras = $('#bar-chart-amostras');
             var existingChart = $chartElementAmostras.data('chart');
             if (existingChart) {
-                // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
                 existingChart.data.labels = labelsAmostras;
                 existingChart.data.datasets[0].data = dataValuesAmostras;
                 existingChart.update();
             } else {
-                // Se não, inicialize um novo gráfico.
-                initChartbar($chartElementAmostras, labelsAmostras, dataValuesAmostras,null ,false);
+                initChartbar($chartElementAmostras, labelsAmostras, dataValuesAmostras, null, false);
             }
-
+            
+            // Classificao
             const labelsPontos = Object.keys(data.pontos);
             const barColorsPontos = labelsPontos.map(getColorForLabelPontos);
             const dataValuesPontos = Object.values(data.pontos);
@@ -121,15 +119,14 @@ function sendClientId(element) {
             var $chartElementPontos = $('#bar-chart-pontos');
             var existingChart = $chartElementPontos.data('chart');
             if (existingChart) {
-                // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
                 existingChart.data.labels = labelsPontos;
                 existingChart.data.datasets[0].data = dataValuesPontos;
-                existingChart.data.datasets[0].backgroundColor = barColorsPontos;  // Definindo as cores aqui
+                existingChart.data.datasets[0].backgroundColor = barColorsPontos;
                 existingChart.update();
             } else {
-                // Se não, inicialize um novo gráfico.
                 initChartbar($chartElementPontos, labelsPontos, dataValuesPontos, barColorsPontos, false);
             }
+
             function getColorForLabelClasses(label) {
                 switch(label) {
                     case 'Sem Vazamento':
@@ -152,34 +149,25 @@ function sendClientId(element) {
                         return 'gray';  // Uma cor padrão caso haja outras categorias não listadas
                 }
             }
-            
-            const [clientId, ...dataValuesClassesRaw] = data.classes[0];
 
+            // Classificacao
+            const dataValuesClassesRaw = data.classes;
+            const dataValuesClasses = dataValuesClassesRaw.slice(0);
             const labelsClasses = ['Fraude', 'Inconsistente', 'Ponto Suspeito', 'Sem Vazamento', 'Sem Acesso', 'Consumo', 'Pendente', 'Vazamento Visível'];
-    
-            // Como você não quer o ID do cliente, não precisamos mudar labelsClasses.
-            const dataValuesClasses = dataValuesClassesRaw;
             const barColorsClasses = labelsClasses.map(getColorForLabelClasses);
-    
             var $chartElementClasses = $('#pie-chart');
             var existingChart = $chartElementClasses.data('chart');
-    
-            // Função para criar rótulos com valores
             function generateLabelsWithValues(labels, data) {
                 return labels.map(function(label, index) {
                     return label + " (" + data[index] + ")";
                 });
             }
-
-            // Dentro do fetch ou onde você lida com a atualização
             if (existingChart) {
-                // Se o gráfico já existe, apenas atualize os dados e o re-renderize.
                 existingChart.data.labels = generateLabelsWithValues(labelsClasses, dataValuesClasses);
                 existingChart.data.datasets[0].data = dataValuesClasses;
                 existingChart.data.datasets[0].backgroundColor = barColorsClasses;
                 existingChart.update();
             } else {
-                // Se não, inicialize um novo gráfico.
                 initChartpie($chartElementClasses, labelsClasses, dataValuesClasses, barColorsClasses);
             }
         

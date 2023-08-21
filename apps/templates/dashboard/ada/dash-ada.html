@@ -3,7 +3,11 @@
 {% block title %} Dashboard {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<script type="text/javascript" src="//d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/cal-heatmap/3.3.10/cal-heatmap.min.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/cal-heatmap/3.3.10/cal-heatmap.css" />
+{% endblock stylesheets %}
 
 {% block content %}
 
@@ -26,7 +30,7 @@
                 </div>
                 <!-- START - template forms -->
                 <div class="col-lg-6 col-12 text-lg-right text-left">
-                    <form class="d-lg-flex d-block justify-content-lg-end justify-content-start" method="POST">
+                    {% comment %} <form class="d-lg-flex d-block justify-content-lg-end justify-content-start" method="POST">
                         {% csrf_token %}
                         <div class="mr-2 mb-lg-0 mb-2">
                             <label for="{{ form.date_1.id_for_label }}" class="mr-2 text-white">De:</label>
@@ -36,13 +40,15 @@
                             <label for="{{ form.date_2.id_for_label }}" class="mr-2 text-white">Até:</label>
                             {{ form.date_2 }}
                         </div>
-                    </form>
+                    </form> {% endcomment %}
                 </div>
                 <!-- END - template forms -->
             </div>
         </div>
     </div>
 </div>
+
+{% comment %} <div id="cal-heatmap"></div> {% endcomment %}
 
 {% endblock content %}
 
@@ -51,5 +57,6 @@
 
 <script src="/static/assets/vendor/chart.js/dist/Chart.min.js"></script>
 <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
+<script src="/static/assets/js/ada.js"></script>
 
 {% endblock javascripts %}
