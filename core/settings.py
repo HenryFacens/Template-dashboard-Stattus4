@@ -19,7 +19,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # load production server from .env
 ALLOWED_HOSTS = [('*')]
-CSRF_TRUSTED_ORIGINS = ['https://9d55-2804-38a-a220-20bb-9598-31cd-f93b-401f.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://bf31-2804-1b1-fa01-e584-a1be-35a9-3226-3f81.ngrok-free.app']
 
 
 
@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.home', # import all apps on home file
+    'apps.home',
     'apps.banco',
     'apps.boletim',
     'rest_framework',

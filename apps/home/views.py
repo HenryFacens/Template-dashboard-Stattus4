@@ -1,3 +1,4 @@
+import json
 from .forms import DateForm
 from django import template
 from django.views import View
@@ -7,7 +8,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
-from .data.fluid.sql_server import  get_amostras_status, get_dti_dtf
+from .data.fluid.sql_server import  get_amostras_status
+from .data.ada.postgresql import  get_cliente_ativos
+from .data.ada.api_ada import get_sector, get_devices
 
 
 class Fluid(View):
@@ -46,20 +49,44 @@ class Ada(View):
 
         context = {}
 
+        clientes = get_cliente_ativos()
+
         context['form'] = DateForm()
 
+        context = {
+            "clientes" : clientes,
+        }
+        
         return render(request, 'dashboard/ada/dash-ada.html', context)
 
     def post(self, request):
 
         context = {}
 
-        form = DateForm(request.POST)
+        data = json.loads(request.body)
 
-        if form.is_valid():
-            request.POST.get('')
-        else:
-            context['errors'] = form.errors
+        get_client = data.get("id_cliente", None)
+        get_client_sub = data.get("sectorId", None)
+
+        if get_client is not None:
+
+            sector_names = get_sector(get_client)
+
+            request.session['client_id'] = get_client
+
+            print(sector_names)
+            context = {
+                "sector_names":sector_names,
+            }
+            
+        if get_client_sub is not None:
+            id_cliente = request.session.get('client_id')
+            devices = get_devices(get_client_sub, id_cliente)
+
+            context = {
+                "sector_names" : None,
+                "devices" : devices,
+            }
 
         return JsonResponse(context)
 

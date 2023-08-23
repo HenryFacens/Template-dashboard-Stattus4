@@ -1,0 +1,11 @@
+<div class="container d-flex justify-content-center align-items-center">
+    {% csrf_token %}
+    <div>
+        <select name="placeholder" class="form-control" style="width: 200px;" id="id_placeholder">
+            <option value="" selected>-----</option>
+            {% for cliente_id, cliente_nome in clientes %}
+                <option value="{{ cliente_id }}">{{ cliente_nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
