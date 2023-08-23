@@ -27,19 +27,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const tableBody = document.getElementById('clientTable').querySelector('tbody');
             tableBody.innerHTML = '';  // limpa as linhas existentes
         
-            data.sector_names.forEach(sector => {
-                const row = tableBody.insertRow();
-        
-                const cellSectorName = row.insertCell(0);
-                cellSectorName.textContent = sector.sectorName;
-                cellSectorName.classList.add('clickable-sector');  // adiciona uma classe para estilizar e identificar facilmente
-                cellSectorName.dataset.sectorId = sector.sectorId;  // armazena o sectorId como um atributo de data
-                
-                // Adiciona o event listener para lidar com o clique
-                cellSectorName.addEventListener('click', function() {
-                    sendSectorIdToBackend(this.dataset.sectorId);
-                });
-            });        
+data.sector_names.forEach(sector => {
+    const row = tableBody.insertRow();
+    const cellSectorName = row.insertCell(0);
+    
+    // Criando um elemento button com a classe btn-link
+    const sectorButton = document.createElement('button');
+    sectorButton.textContent = sector.sectorName;
+    sectorButton.classList.add('btn', 'btn-link', 'clickable-sector');
+    sectorButton.dataset.sectorId = sector.sectorId;
+    
+    // Adiciona o event listener para lidar com o clique
+    sectorButton.addEventListener('click', function() {
+        sendSectorIdToBackend(this.dataset.sectorId);
+    });
+    
+    // Adiciona o button na célula da tabela
+    cellSectorName.appendChild(sectorButton);
+});
             
         })
         .catch(error => {

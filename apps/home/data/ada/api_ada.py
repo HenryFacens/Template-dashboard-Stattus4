@@ -1,5 +1,6 @@
 
 import requests
+from . postgresql import get_devices_db
 
 API_HOST = "https://api-sistemas.stattus4.com/4fluid/iot/ada/"
 
@@ -37,8 +38,15 @@ def get_devices(get_client_sub, id_cliente):
         response = requests.post(API_HOST + 'sector/scheme', json=payload)
 
         data = response.json()
+        dvc_list = data['dvcList']
 
-        print(data)
+        active_device_ids = [dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']]
+        
+        devices_lat_long_comrate = get_devices_db(active_device_ids)
 
+        return devices_lat_long_comrate
+    
     except Exception as error:
         print(error)
+        
+        return []

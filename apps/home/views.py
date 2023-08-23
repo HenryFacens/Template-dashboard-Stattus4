@@ -80,7 +80,9 @@ class Ada(View):
             }
             
         if get_client_sub is not None:
+
             id_cliente = request.session.get('client_id')
+
             devices = get_devices(get_client_sub, id_cliente)
 
             context = {
