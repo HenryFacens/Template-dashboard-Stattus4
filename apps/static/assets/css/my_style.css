@@ -47,6 +47,7 @@
     position: sticky;
     top: 0;
 }
+#map { height: 180px; }
 @media (min-width: 1200px) {
     .container {
         max-width: 95%; /* Ou qualquer outro valor que você desejar */

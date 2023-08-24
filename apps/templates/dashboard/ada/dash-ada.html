@@ -4,9 +4,14 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
+
 <script type="text/javascript" src="//d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript" src="//cdn.jsdelivr.net/cal-heatmap/3.3.10/cal-heatmap.min.js"></script>
 <link rel="stylesheet" href="//cdn.jsdelivr.net/cal-heatmap/3.3.10/cal-heatmap.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""/>
+
 {% endblock stylesheets %}
 
 {% block content %}
@@ -70,6 +75,15 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-lg-6 col-12">
+                <div id="map" style="width: 90%; height: 92%;"></div>
+            </div>
+
+            <div class="col-lg-3 col-12">
+                <div id="cal-heatmap"></div>
+            </div>
+
         </div>
     </div>
 
@@ -80,6 +94,9 @@
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
 <script src="/static/assets/vendor/chart.js/dist/Chart.min.js"></script>
 <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
 <script src="/static/assets/js/ada.js"></script>

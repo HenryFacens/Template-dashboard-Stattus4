@@ -42,7 +42,10 @@ def get_devices_db(active_device_ids):
                 d.serial_number,
                 cr.conn_evt,
                 ip.lat,
-                ip.long
+                ip.long,
+                cr.communication_day,
+                cr.conn_rate,
+                cr."timestamp"
             FROM "4fluid-iot".devices AS d
             LEFT JOIN "4fluid-iot".connectivity_rate AS cr ON d.id = cr.device_id AND cr."timestamp" > current_date - interval '7 days'
             LEFT JOIN "4fluid-iot".install_points AS ip ON d.install_point_id = ip.id
@@ -60,7 +63,10 @@ def get_devices_db(active_device_ids):
             "serial_number": info[3],
             "conn_evt": info[4],
             "lat": info[5],
-            "long": info[6]
+            "long": info[6],
+            "communication_day": info[7],
+            "conn_rate": info[8],
+            "timestamp": info[9],
         } for info in combined_info
     ]
     print(combined_data)
