@@ -69,5 +69,4 @@ def get_devices_db(active_device_ids):
             "timestamp": info[9],
         } for info in combined_info
     ]
-    print(combined_data)
     return combined_data

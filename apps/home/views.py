@@ -83,11 +83,12 @@ class Ada(View):
 
             id_cliente = request.session.get('client_id')
 
-            devices = get_devices(get_client_sub, id_cliente)
+            devices, data_conn = get_devices(get_client_sub, id_cliente)
 
             context = {
                 "sector_names" : None,
                 "devices" : devices,
+                "devices_conn":data_conn,
             }
 
         return JsonResponse(context)
