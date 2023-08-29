@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.home',
-    'apps.banco',
     'apps.boletim',
     'rest_framework',
     'django.contrib.humanize',
@@ -91,6 +90,7 @@ HOST_SECOND_PORT    = config('HOST_SECOND_PORT')
 
 # DATABASE_ROUTERS = ['apps.banco.dbrouters.DefaultDbRouter', 'apps.banco.dbrouters.SqlServerDbRouter']
 
+#Definicoes da databases
 
 DATABASES = {
     'default': {

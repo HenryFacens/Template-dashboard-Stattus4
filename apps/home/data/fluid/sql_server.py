@@ -1,5 +1,4 @@
 from django.db import connections
-from itertools import groupby
 import datetime
 
 

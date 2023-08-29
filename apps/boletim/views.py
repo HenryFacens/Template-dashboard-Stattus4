@@ -12,8 +12,6 @@ class Boletim_fluid(View):
 
         context = {}
 
-        dados = {}
-
         cliente = group_clients()
 
         context = {

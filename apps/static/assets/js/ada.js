@@ -1,52 +1,50 @@
+    // mapaConectividade 
+    var comunicouIcon = L.icon({
+        iconUrl: '/static/assets/img/stattus4/pins_mapa/pinVerde.6717c697.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
 
-        // mapaConectividade 
-var comunicouIcon = L.icon({
-    iconUrl: '/static/assets/img/stattus4/pins_mapa/pinVerde.6717c697.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
+    var naoComunicouIcon = L.icon({
+        iconUrl: '/static/assets/img/stattus4/pins_mapa/pinVermelho.3da980e7.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
 
-var naoComunicouIcon = L.icon({
-    iconUrl: '/static/assets/img/stattus4/pins_mapa/pinVermelho.3da980e7.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
-
-var intermediarioIcon = L.icon({
-    iconUrl: '/static/assets/img/stattus4/pins_mapa/pinAmarelo.9872369c.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
-var cal = new CalHeatMap();
-cal.init({
-    start: new Date(),  // Inicia no mês atual
-    domain: "month",  // Mostra um mês de cada vez
-    subDomain: "x_day",  // Divide o mês em dias
-    range: 1,  // Mostra apenas um mês
-    cellSize: 15,  // Tamanho das células (ajuste conforme necessário)
-    verticalOrientation: false,  // Orientação horizontal
-    subDomainTextFormat: '%d',
-    domainGutter: 10,  // Espaço entre os domínios
-    domainMargin: [0, 0, 0, 0],  // Margem ao redor do domínio
-    displayLegend: false,  // Oculta a legenda (ajuste conforme necessário)
-    considerMissingDataAsZero: true,  // Dados ausentes são considerados como zero
-    data: {},
-    // Cores para 0 (não comunicou) e 1 (comunicou)
-    colLimit: 2,
-    legend: [1],
-    legendColors: {
-        min: "gray",
-        max: "#00ff00",
-        empty: "red"
-    },
-});
+    var intermediarioIcon = L.icon({
+        iconUrl: '/static/assets/img/stattus4/pins_mapa/pinAmarelo.9872369c.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+    var cal = new CalHeatMap();
+    cal.init({
+        start: new Date(),  // Inicia no mês atual
+        domain: "month",  // Mostra um mês de cada vez
+        subDomain: "x_day",  // Divide o mês em dias
+        range: 1,  // Mostra apenas um mês
+        cellSize: 15,  // Tamanho das células (ajuste conforme necessário)
+        verticalOrientation: false,  // Orientação horizontal
+        subDomainTextFormat: '%d',
+        domainGutter: 10,  // Espaço entre os domínios
+        domainMargin: [0, 0, 0, 0],  // Margem ao redor do domínio
+        displayLegend: false,  // Oculta a legenda (ajuste conforme necessário)
+        considerMissingDataAsZero: true,  // Dados ausentes são considerados como zero
+        data: {},
+        // Cores para 0 (não comunicou) e 1 (comunicou)
+        colLimit: 2,
+        legend: [1],
+        legendColors: {
+            min: "gray",
+            max: "#00ff00",
+            empty: "red"
+        },
+    });
 
 
 // Iniciacao do Mapa
-
 var map = L.map('map').setView([-23.46958528542014, -47.417883846037455], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -62,7 +60,7 @@ function getCookie(name) {
     if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
-// pegada dos clietes
+// Get Custumers
 document.addEventListener('DOMContentLoaded', function() {
     const placeholderSelect = document.getElementById('id_placeholder');
 
@@ -83,7 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            // passar os Setores para a tabela
+
+            // passando os Setores para a tabela
             const tableBody = document.getElementById('clientTable').querySelector('tbody');
             tableBody.innerHTML = '';
         
@@ -112,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // posSetores
-
 function sendSectorIdToBackend(sectorId) {
     fetch('/dash-ada/', {
         method: 'POST',
@@ -197,44 +195,44 @@ function sendSectorIdToBackend(sectorId) {
         // Ordena os dispositivos por avg_conn_rate do menor para o maior
         data.devices_conn.sort((a, b) => a.avg_conn_rate - b.avg_conn_rate);
 
-// Pega o elemento tbody da tabela
-const tbody = document.querySelector("#clientTableBelowHeatmap tbody");
+        // Pega o elemento tbody da tabela
+        const tbody = document.querySelector("#clientTableBelowHeatmap tbody");
 
-// Limpa o tbody (caso já contenha linhas)
-tbody.innerHTML = "";
+        // Limpa o tbody (caso já contenha linhas)
+        tbody.innerHTML = "";
 
-function centerMapOnDevice(serial) {
-    const marker = markersBySerial[serial];
-    if(marker) {
-        map.setView(marker.getLatLng(), 17);  // 17 é um nível de zoom mais aproximado, ajuste conforme necessário
-        marker.openPopup();  // Abre o pop-up do marcador
-    }
-}
-// Para cada dispositivo, cria uma linha na tabela
-data.devices_conn.forEach(device => {
-    // Cria elementos tr e td
-    const tr = document.createElement('tr');
-    const tdSerial = document.createElement('td');
-    const tdAvgConnRate = document.createElement('td');
+        function centerMapOnDevice(serial) {
+            const marker = markersBySerial[serial];
+            if(marker) {
+                map.setView(marker.getLatLng(), 17);  // 17 é um nível de zoom mais aproximado, ajuste conforme necessário
+                marker.openPopup();  // Abre o pop-up do marcador
+            }
+        }
+        // Para cada dispositivo, cria uma linha na tabela
+        data.devices_conn.forEach(device => {
+            // Cria elementos tr e td
+            const tr = document.createElement('tr');
+            const tdSerial = document.createElement('td');
+            const tdAvgConnRate = document.createElement('td');
 
-    // Preenche os td com serial_number e avg_conn_rate
-    tdSerial.textContent = device.serial_number;
-    tdAvgConnRate.textContent = device.avg_conn_rate.toFixed(2);  // Ajusta para mostrar apenas 2 casas decimais
-    
-    // Adiciona um evento de clique ao tdSerial
-    tdSerial.addEventListener('click', () => {
-        centerMapOnDevice(device.serial_number, data.devices);
-    });
+            // Preenche os td com serial_number e avg_conn_rate
+            tdSerial.textContent = device.serial_number;
+            tdAvgConnRate.textContent = device.avg_conn_rate.toFixed(2);  // Ajusta para mostrar apenas 2 casas decimais
+            
+            // Adiciona um evento de clique ao tdSerial
+            tdSerial.addEventListener('click', () => {
+                centerMapOnDevice(device.serial_number, data.devices);
+            });
 
-    // Adiciona os td ao tr e o tr ao tbody
-    tr.appendChild(tdSerial);
-    tr.appendChild(tdAvgConnRate);
-    tbody.appendChild(tr);
-});
+            // Adiciona os td ao tr e o tr ao tbody
+            tr.appendChild(tdSerial);
+            tr.appendChild(tdAvgConnRate);
+            tbody.appendChild(tr);
+        });
 
-    })
-    .catch(error => {
-        console.error('Erro ao enviar o sectorId:', error);
-    });
-}
+            })
+            .catch(error => {
+                console.error('Erro ao enviar o sectorId:', error);
+            });
+        }
 

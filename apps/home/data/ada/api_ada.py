@@ -1,7 +1,6 @@
 
 import requests
 from . postgresql import get_devices_db
-from datetime import datetime, timedelta
 
 API_HOST = "https://api-sistemas.stattus4.com/4fluid/iot/ada/"
 

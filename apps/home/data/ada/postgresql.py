@@ -1,6 +1,4 @@
 from django.db import connections
-from itertools import groupby
-import datetime
 
 
 def get_cliente_ativos():
