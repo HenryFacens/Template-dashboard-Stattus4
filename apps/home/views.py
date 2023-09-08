@@ -74,7 +74,7 @@ class Ada(View):
 
             request.session['client_id'] = get_client
 
-            print(sector_names)
+            # print(sector_names)
             context = {
                 "sector_names":sector_names,
             }
@@ -83,12 +83,13 @@ class Ada(View):
 
             id_cliente = request.session.get('client_id')
 
-            devices, data_conn = get_devices(get_client_sub, id_cliente)
+            devices, data_conn, consistencia_dados = get_devices(get_client_sub, id_cliente)
 
             context = {
                 "sector_names" : None,
                 "devices" : devices,
                 "devices_conn":data_conn,
+                "consistencia_dados":consistencia_dados,
             }
 
         return JsonResponse(context)

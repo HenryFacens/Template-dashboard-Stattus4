@@ -33,7 +33,7 @@
                                     {% if mes_data %}
                                     <strong>Total de Coletas: {{ mes_data|get_item:"Total de Coletas"|intcomma|default:"-" }}</strong><br>
                                     <strong>Pontos Confirmados: {{ mes_data|get_item:"Pontos Confirmados"|intcomma|default:"-" }}</strong><br>
-                                    <strong>Pontos Não Confirmados: {{ mes_data|get_item:"Pontos Não Confirmados"|intcomma|default:"-" }}</strong><br>
+                                    <strong>Pontos Não Confirmados: {{ mes_data|get_item:"Ponto Não Confirmado"|intcomma|default:"-" }}</strong><br>
                                     <strong>Pendentes: {{ mes_data|get_item:"Pendente"|intcomma|default:"-" }}</strong><br>
                                     <strong>Acurácia: {{ mes_data|get_item:"acuracia"|floatformat:2|default:"-" }}</strong>
                                     

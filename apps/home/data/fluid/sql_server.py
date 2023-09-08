@@ -89,7 +89,7 @@ def get_amostras_status():
     final_organizado = organize_data(final)
 
     meses_unicos1 = obter_meses_unicos(final_organizado)
-    
+    print(final_organizado)
     return final_organizado, meses_unicos1
 
 def get_total_amostras_por_mes(start_date, end_date):

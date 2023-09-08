@@ -19,7 +19,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # load production server from .env
 ALLOWED_HOSTS = [('*')]
-CSRF_TRUSTED_ORIGINS = ['https://f7f5-200-211-62-61.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://750e-2804-1b1-fa00-27fd-4d10-7982-8d55-e019.ngrok-free.app']
 
 
 
@@ -92,8 +92,24 @@ HOST_SECOND_PORT    = config('HOST_SECOND_PORT')
 
 #Definicoes da databases
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 0,
+    'password': 'qU2m9F6r£0[',
+    'prefix': 'session',
+    'socket_timeout': 1
+    
+},
+
+
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': "db.sqlite3",
+    },
+    'postgre': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': HOST_DEFAULT_NAME,
         'USER': HOST_DEFAULT_USER,
@@ -115,6 +131,7 @@ DATABASES = {
             'driver': "SQL Server Native Client 11.0",
             'options': '-c search_path=dbo',
         },
+        
     }
 }
 

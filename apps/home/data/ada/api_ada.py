@@ -1,6 +1,6 @@
 
 import requests
-from . postgresql import get_devices_db
+from . postgresql import get_devices_db, get_consistency
 
 API_HOST = "https://api-sistemas.stattus4.com/4fluid/iot/ada/"
 
@@ -41,12 +41,12 @@ def transform_conn(data):
 
     # Transforma o dicionário em uma lista de dispositivos
     result = [{"device_id": device_id, **device_data} for device_id, device_data in devices.items()]
-    print(result)
+    # print(result)
     return result
 
 def get_sector(id_client):
 
-    print(f'ID do cliente  = {id_client}')
+    # print(f'ID do cliente  = {id_client}')
 
     payload = {
         "clientId": id_client
@@ -82,11 +82,13 @@ def get_devices(get_client_sub, id_cliente):
         active_device_ids = [dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']]
         
         devices_lat_long_comrate = get_devices_db(active_device_ids)
-        print(devices_lat_long_comrate)
+        consistencia_dados = get_consistency(active_device_ids)
+
+        # print(devices_lat_long_comrate)
         # Dados de comunicacao
         data_conn = transform_conn(devices_lat_long_comrate)
 
-        return devices_lat_long_comrate, data_conn
+        return devices_lat_long_comrate, data_conn, consistencia_dados
     
     except Exception as error:
         print(error)
