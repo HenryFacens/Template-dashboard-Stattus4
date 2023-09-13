@@ -1,6 +1,6 @@
 
 import requests
-from . postgresql import get_devices_db, get_consistency
+from . postgresql import get_devices_db, get_consistency, cal_hidraulica
 
 API_HOST = "https://api-sistemas.stattus4.com/4fluid/iot/ada/"
 
@@ -80,7 +80,11 @@ def get_devices(get_client_sub, id_cliente):
         dvc_list = data['dvcList']
 
         active_device_ids = [dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']]
+
+        print(f"Devices  = {active_device_ids}")
         
+        hidraulioc = cal_hidraulica(active_device_ids)
+        print_results(hidraulioc)
         devices_lat_long_comrate = get_devices_db(active_device_ids)
         consistencia_dados = get_consistency(active_device_ids)
 
@@ -88,9 +92,43 @@ def get_devices(get_client_sub, id_cliente):
         # Dados de comunicacao
         data_conn = transform_conn(devices_lat_long_comrate)
 
-        return devices_lat_long_comrate, data_conn, consistencia_dados
+        return devices_lat_long_comrate, data_conn, consistencia_dados, hidraulioc
     
     except Exception as error:
-        print(error)
+        print(f"Error in get_devices: {error}")
         
-        return []
+        return None, None, None
+
+
+def print_results(data):
+    # if "average_pressure_daily" in data:
+    #     print("\n=== Average Pressure Daily ===")
+    #     for entry in data["average_pressure_daily"]:
+    #         if all(entry):
+    #             print(f"Date: {entry[1]} | Device: {entry[0]} | Average Pressure: {entry[2]:.2f} | Altitude: {entry[3]:.2f}")
+    #         else:
+    #             print(f"Date: {entry[1]} | Device: {entry[0]} | Error: Missing data")
+
+    # if "hydraulic_load_daily" in data:
+    #     print("\n=== Hydraulic Load Daily ===")
+    #     for entry in data["hydraulic_load_daily"]:
+    #         if all(entry):
+    #             print(f"Date: {entry[1]} | Device: {entry[0]} | Hydraulic Load: {entry[2]:.2f}")
+    #         else:
+    #             print(f"Date: {entry[1]} | Device: {entry[0]} | Error: Missing data")
+    
+    if "mvn_avg_pressure" in data:
+        print("\n=== MVN Average Pressure ===")
+        for entry in data["mvn_avg_pressure"]:
+            if all(entry):
+                print(f"Date: {entry[1]} | Device: {entry[0]} | MVN Average Pressure: {entry[2]:.2f}")
+            else:
+                print(f"Date: {entry[1]} | Device: {entry[0]} | Error: Missing data")
+
+    if "mvn_hydraulic_load" in data:
+        print("\n=== MVN Hydraulic Load ===")
+        for entry in data["mvn_hydraulic_load"]:
+            if all(entry):
+                print(f"Date: {entry[1]} | Device: {entry[0]} | MVN Hydraulic Load: {entry[2]:.2f}")
+            else:
+                print(f"Date: {entry[1]} | Device: {entry[0]} | Error: Missing data")

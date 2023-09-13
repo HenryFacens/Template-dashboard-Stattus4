@@ -295,6 +295,20 @@ function sendSectorIdToBackend(sectorId) {
                         addedSerials.add(device.serial_number);
                     });
 
+                    let hidrauliocData = data.hidraulioc.mvn_avg_pressure;
+                    console.log(hidrauliocData)
+
+                    let labelsbar = hidrauliocData.map(entry => entry[1]);  // Pegar a data de cada entrada
+                    let databar = hidrauliocData.map(entry => entry[2]);    // Supondo que 77.5 seja o valor que você quer mostrar no gráfico
+                    let colorsbar = [];  // Você precisa definir suas cores, se houver uma cor específica para cada entrada
+
+                    // Se você tem um elemento onde o gráfico será renderizado, você pode chamá-lo assim:
+                    let $chartElement = document.getElementById('carga_hidraulica');
+
+                    initChartline($chartElement, labelsbar, databar, colorsbar, true, 'Coleta');
+
+
+                    
             })
             .catch(error => {
                 console.error('Erro ao enviar o sectorId:', error);

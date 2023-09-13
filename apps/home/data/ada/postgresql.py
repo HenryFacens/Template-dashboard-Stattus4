@@ -1,5 +1,5 @@
 from django.db import connections
-
+import datetime
 
 def get_cliente_ativos():
     with connections['postgre'].cursor() as cursor:
@@ -106,10 +106,94 @@ def get_consistency(active_device_ids):
             consistency = "consistente"
             reason = "Valor normal"
         
-        # Atualizar o dicionário com a consistência e a razão para cada serial_number
         consistency_data[serial_number] = {
             "consistency": consistency,
             "reason": reason
         }
 
     return consistency_data
+
+
+# def avg_pressure_per_day(cursor, active_device_ids): #Errada
+#     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
+#     end_date = datetime.datetime.now()
+#     start_date = end_date - datetime.timedelta(days=30)
+
+#     query = f"""
+#     SELECT
+#         d.device_id,
+#         DATE(d."timestamp") as day_date,
+#         AVG(d.single_value) as avg_pressure,
+#         p.alt
+#     FROM 
+#         "4fluid-iot".devices_data d
+#     JOIN
+#         "4fluid-iot".install_points p ON d.install_point_id = p.id
+#     WHERE
+#         d.device_id IN ({device_ids_string}) AND
+#         d."timestamp" BETWEEN '{start_date}' AND '{end_date}'
+#     GROUP BY
+#         d.device_id, DATE(d."timestamp"), p.alt
+#     ORDER BY
+#         d.device_id, day_date;
+#     """
+    
+#     cursor.execute(query)
+#     return cursor.fetchall()
+
+# def hydraulic_load_hourly(avg_pressure_data):
+#     try:
+#         return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_data]
+#     except Exception as e:
+#         print(f"Error in hydraulic_load_hourly: {e}")
+#         return []
+
+def avg_pressure_mvn(cursor, active_device_ids, mvn_hour=4): #certa 
+    device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
+    end_date = datetime.datetime.now()
+    start_date = end_date - datetime.timedelta(days=30)
+
+    query = f"""
+    SELECT
+        d.device_id,
+        DATE(d."timestamp") as day_date,
+        AVG(d.single_value) as avg_pressure,
+        p.alt
+    FROM 
+        "4fluid-iot".devices_data d
+    JOIN
+        "4fluid-iot".install_points p ON d.install_point_id = p.id
+    WHERE
+        d.device_id IN ({device_ids_string}) AND
+        d."timestamp" BETWEEN '{start_date}' AND '{end_date}' AND
+        EXTRACT(HOUR FROM d."timestamp") = {mvn_hour}
+    GROUP BY
+        d.device_id, DATE(d."timestamp"), p.alt
+    ORDER BY
+        d.device_id, day_date;
+    """
+    
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def hydraulic_load_for_mvn(avg_pressure_mvn_data):
+    return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_mvn_data]
+
+def cal_hidraulica(active_device_ids, mvn_hour=4):
+    try:
+        with connections['postgre'].cursor() as cursor:
+            # avg_data_daily = avg_pressure_per_day(cursor, active_device_ids) #
+            # hydraulic_data_daily = hydraulic_load_hourly(avg_data_daily) #
+
+            avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids, mvn_hour)
+            hydraulic_data_mvn = hydraulic_load_for_mvn(avg_data_mvn)
+        
+        return {
+            # "average_pressure_daily": avg_data_daily,
+            # "hydraulic_load_daily": hydraulic_data_daily,
+            "mvn_avg_pressure": avg_data_mvn,
+            "mvn_hydraulic_load": hydraulic_data_mvn
+        }
+    except Exception as e:
+        print(f"Error in cal_hidraulica: {e}")
+        return {}

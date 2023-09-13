@@ -12,7 +12,7 @@ def get_cliente_ativos():
         WHERE ativo = 1;
                        """)
         clientes_ativos = cursor.fetchall()
-    print(clientes_ativos)
+    # print(clientes_ativos)
     return clientes_ativos
 
 
@@ -39,7 +39,7 @@ def get_amostras_status():
     lista_ids_clientes = [str(cliente[0]) for cliente in clientes]
     ids_clientes_str = ",".join(lista_ids_clientes)
     start_str, end_str = get_dti_dtf()
-    print(ids_clientes_str)
+    # print(ids_clientes_str)
     with connections['sql_server'].cursor() as cursor:
 
         cursor.execute(f"""
@@ -89,7 +89,7 @@ def get_amostras_status():
     final_organizado = organize_data(final)
 
     meses_unicos1 = obter_meses_unicos(final_organizado)
-    print(final_organizado)
+    # print(final_organizado)
     return final_organizado, meses_unicos1
 
 def get_total_amostras_por_mes(start_date, end_date):
@@ -252,7 +252,7 @@ def verifica_subs(id_cliente):
     subs_list.insert(0, str(id_cliente))
     
     ids_clientes_str = ','.join(subs_list)
-    print(ids_clientes_str)
+    # print(ids_clientes_str)
     return ids_clientes_str
 
 

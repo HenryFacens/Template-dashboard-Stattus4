@@ -83,3 +83,34 @@ function initChartpie($chartElement, labels, data, colors,legend_onoff = true,  
 
     $chartElement.data('chart', ordersChart);
 }
+
+function initChartline($chartElement, labels, data, colors, legend_onoff = true ,legend = 'Sales') {
+    var ordersChart = new Chart($chartElement, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: legend,
+                data: data,
+                backgroundColor: colors, 
+                borderColor: colors,  
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            legend: {
+                display: legend_onoff,
+            },
+            tooltips: {
+                enabled: false
+            }
+        }
+    });
+
+    $chartElement.data('chart', ordersChart);
+}
