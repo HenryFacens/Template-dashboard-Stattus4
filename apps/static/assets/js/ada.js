@@ -1,3 +1,11 @@
+    // random colors    
+    function getRandomColor() {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
     // mapaConectividade 
     var comunicouIcon = L.icon({
         iconUrl: '/static/assets/img/stattus4/pins_mapa/pinVerde.6717c697.png',
@@ -214,39 +222,31 @@ function sendSectorIdToBackend(sectorId) {
                             markersGroup.addLayer(exclamationMarker);
                         }
                     });
-
+                    
+                    // Lista de dispositivos
+                    function filterDatasetsBySerialNumber(serialNumber, datasets) {
+                        return datasets.filter(dataset => dataset.label === `Sensor: ${serialNumber}`);
+                    }
+                    
+                    
                     if (data.devices.length > 0) {
                         var lastDevice = data.devices[data.devices.length - 1];
-                        map.setView([lastDevice.lat, lastDevice.long], 13); // 13 é o nível de zoom, ajuste conforme necessário
+                        map.setView([lastDevice.lat, lastDevice.long], 13);
                     }
-                    // Ordena os dispositivos por avg_conn_rate do menor para o maior
+
                     data.devices_conn.sort((a, b) => a.avg_conn_rate - b.avg_conn_rate);
 
                     const tbody = document.querySelector("#clientTableBelowHeatmap tbody");
 
-                    // Limpa o tbody (caso já contenha linhas)
                     tbody.innerHTML = "";
-                    
-                    function centerMapOnDevice(serial) {
-                        const marker = markersBySerial[serial];
-                        if(marker) {
-                            map.setView(marker.getLatLng(), 17);
-                            marker.openPopup();
-                        }
-                    }
-        
 
-                    // Função para encontrar um dispositivo em devices_conn com base no serial_number
                     function findDeviceInConn(serialNumber, devicesConn) {
                         return devicesConn.find(device => device.serial_number === serialNumber);
                     }
 
-                    // Conjunto para armazenar serial_numbers únicos que foram adicionados
                     const addedSerials = new Set();
 
-                    // Para cada dispositivo em data.devices, cria uma linha na tabela
                     data.devices.forEach(device => {
-                        // Se o serial_number já foi adicionado, pula para o próximo
                         if (addedSerials.has(device.serial_number)) {
                             return;
                         }
@@ -257,10 +257,8 @@ function sendSectorIdToBackend(sectorId) {
                         const tdConsistency = document.createElement('td');
                         const tdReason = document.createElement('td');
                         
-                        // Preenche o tdSerial
                         tdSerial.textContent = device.serial_number;
                         
-                        // Tenta encontrar o dispositivo em data.devices_conn
                         const deviceInConn = findDeviceInConn(device.serial_number, data.devices_conn);
                         
                         // Se encontrarmos o dispositivo em devices_conn, usamos seus dados. Caso contrário, usamos 0 como valor padrão.
@@ -281,8 +279,9 @@ function sendSectorIdToBackend(sectorId) {
 
                         // Adiciona um evento de clique ao tdSerial
                         tdSerial.addEventListener('click', () => {
-                            centerMapOnDevice(device.serial_number, data.devices);
+                            centerMapOnDevice(device.serial_number);
                         });
+                        
                         
                         // Adiciona os td ao tr e o tr ao tbody
                         tr.appendChild(tdSerial);
@@ -295,23 +294,68 @@ function sendSectorIdToBackend(sectorId) {
                         addedSerials.add(device.serial_number);
                     });
 
-                    let hidrauliocData = data.hidraulioc.mvn_avg_pressure;
-                    console.log(hidrauliocData)
+                    // Função que constrói os datasets
+                function buildDatasets(hidrauliocData) {
+                    let categorizedData = {};
+                    let allDates = new Set();
 
-                    let labelsbar = hidrauliocData.map(entry => entry[1]);  // Pegar a data de cada entrada
-                    let databar = hidrauliocData.map(entry => entry[2]);    // Supondo que 77.5 seja o valor que você quer mostrar no gráfico
-                    let colorsbar = [];  // Você precisa definir suas cores, se houver uma cor específica para cada entrada
+                    hidrauliocData.forEach(entry => {
+                        let sensorId = entry[0];
+                        let date = entry[1];
+                        allDates.add(date);
 
-                    // Se você tem um elemento onde o gráfico será renderizado, você pode chamá-lo assim:
-                    let $chartElement = document.getElementById('carga_hidraulica');
+                        if (!categorizedData[sensorId]) {
+                            categorizedData[sensorId] = [];
+                        }
+                        categorizedData[sensorId].push(entry);
+                    });
 
-                    initChartline($chartElement, labelsbar, databar, colorsbar, true, 'Coleta');
+                    let sortedDates = [...allDates].sort();
+
+                    let datasets = [];
+                    for (let sensorId in categorizedData) {
+                        let dataMap = new Map(categorizedData[sensorId].map(entry => [entry[1], entry[2]]));
+                        let dataValues = sortedDates.map(date => dataMap.get(date) || null);
+
+                        let randomColor = getRandomColor();
+
+                        datasets.push({
+                            label: `Sensor: ${sensorId}`,
+                            data: dataValues,
+                            backgroundColor: randomColor,
+                            borderColor: randomColor,
+                            borderWidth: 1
+                        });
+                    }
+
+                    return { datasets, sortedDates };
+                }
 
 
+                let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
+                let ctx = $('#carga_hidraulica');
+                initChartLine(ctx, sortedDates, datasets, false);
+                
                     
-            })
-            .catch(error => {
-                console.error('Erro ao enviar o sectorId:', error);
-            });
-        }
+                    // ...
+                    function centerMapOnDevice(serial) {
+                        const marker = markersBySerial[serial];
+                        if(marker) {
+                            map.setView(marker.getLatLng(), 17);
+                            marker.openPopup();
+                        }
+                    
+                        let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
+                        const filteredDatasets = filterDatasetsBySerialNumber(serial, datasets);
+                    
+                        let ctx = $('#carga_hidraulica');
+                        initChartLine(ctx, sortedDates, filteredDatasets, false);
+                    }
+                    
+                                
+                        })
+                        .catch(error => {
+                            console.error('Erro ao enviar o sectorId:', error);
+                        });
+                    }
 

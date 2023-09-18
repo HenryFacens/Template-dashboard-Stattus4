@@ -84,7 +84,7 @@ def get_devices(get_client_sub, id_cliente):
         print(f"Devices  = {active_device_ids}")
         
         hidraulioc = cal_hidraulica(active_device_ids)
-        print_results(hidraulioc)
+        # print_results(hidraulioc)
         devices_lat_long_comrate = get_devices_db(active_device_ids)
         consistencia_dados = get_consistency(active_device_ids)
 

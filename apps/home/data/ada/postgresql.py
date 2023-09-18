@@ -155,7 +155,7 @@ def avg_pressure_mvn(cursor, active_device_ids, mvn_hour=4): #certa
 
     query = f"""
     SELECT
-        d.device_id,
+        dev.serial_number,
         DATE(d."timestamp") as day_date,
         AVG(d.single_value) as avg_pressure,
         p.alt
@@ -163,14 +163,17 @@ def avg_pressure_mvn(cursor, active_device_ids, mvn_hour=4): #certa
         "4fluid-iot".devices_data d
     JOIN
         "4fluid-iot".install_points p ON d.install_point_id = p.id
+    JOIN
+        "4fluid-iot".devices dev ON d.device_id = dev.id
     WHERE
         d.device_id IN ({device_ids_string}) AND
         d."timestamp" BETWEEN '{start_date}' AND '{end_date}' AND
         EXTRACT(HOUR FROM d."timestamp") = {mvn_hour}
     GROUP BY
-        d.device_id, DATE(d."timestamp"), p.alt
+        dev.serial_number, DATE(d."timestamp"), p.alt
     ORDER BY
-        d.device_id, day_date;
+        dev.serial_number, day_date; 
+
     """
     
     cursor.execute(query)

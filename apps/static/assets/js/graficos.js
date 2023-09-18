@@ -3,6 +3,9 @@ Chart.plugins.register({
         if (chart.config.type === 'pie') {
             return; // Se o tipo de gráfico for 'pie', saia da função e não faça nada.
         }
+        if (chart.config.type === 'line') {
+            return; // Se o tipo de gráfico for 'pie', saia da função e não faça nada.
+        }
         var ctx = chart.ctx;
 
         ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
@@ -84,33 +87,71 @@ function initChartpie($chartElement, labels, data, colors,legend_onoff = true,  
     $chartElement.data('chart', ordersChart);
 }
 
-function initChartline($chartElement, labels, data, colors, legend_onoff = true ,legend = 'Sales') {
-    var ordersChart = new Chart($chartElement, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: legend,
-                data: data,
-                backgroundColor: colors, 
-                borderColor: colors,  
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: false
+function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
+
+    let minValues = datasets.map(dataset => Math.min(...dataset.data.filter(Boolean)));
+    let minValue = Math.min(...minValues);
+
+    // Verificar se o elemento já possui um gráfico associado a ele
+    let existingChart = $($chartElement).data('chart');
+
+    if (existingChart) {
+        // Se já possui, atualizar o gráfico em vez de criar um novo
+        existingChart.data.labels = labels;
+        existingChart.data.datasets = datasets.map(dataset => ({
+            ...dataset,
+            fill: false,
+            borderWidth: 3
+        }));
+        existingChart.update();
+        return existingChart;
+    } else {
+        let salesChart = new Chart($chartElement, {
+            type: 'line',
+            options: {
+                scales: {
+                    yAxes: [{
+                        gridLines: {
+                            lineWidth: 3,
+                            color: 'gray',
+                            zeroLineColor: 'gray'
+                        },
+                        ticks: {
+                            beginAtZero: false,
+                            min: minValue - 20,
+                            callback: function(value) {
+                                if (!(value % 10)) {
+                                    return value + ' mca';
+                                }
+                            }
+                        }
+                    }]
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(item, data) {
+                            var label = data.datasets[item.datasetIndex].label || '';
+                            var yLabel = item.yLabel;
+                            var content = '';
+                            content += label + ": " + yLabel + " mca";
+                            return content;
+                        }
+                    }
+                },
+                legend: {
+                    display: legend_onoff,
                 }
             },
-            legend: {
-                display: legend_onoff,
-            },
-            tooltips: {
-                enabled: false
+            data: {
+                labels: labels,
+                datasets: datasets.map(dataset => ({
+                    ...dataset,
+                    fill: false,
+                    borderWidth: 3
+                }))
             }
-        }
-    });
-
-    $chartElement.data('chart', ordersChart);
+        });
+        $($chartElement).data('chart', salesChart);
+        return salesChart;
+    }
 }
