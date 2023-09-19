@@ -87,3 +87,17 @@ class JSON_Boletim_pdf(Boletim_fluid):
         context = self.process_data(request)
 
         return JsonResponse({'context': context})
+    
+
+class Boletim_ada(View):
+
+    def post(self,resquest):
+        context = {}
+
+        return render(resquest, 'boletim/ada/boletim-ada.html', context)
+
+    def get(self,resquest):
+
+        context = {}
+
+        return JsonResponse(context)

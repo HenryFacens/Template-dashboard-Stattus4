@@ -332,12 +332,12 @@ function sendSectorIdToBackend(sectorId) {
                 }
 
 
-                let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
-                let ctx = $('#carga_hidraulica');
-                initChartLine(ctx, sortedDates, datasets, false);
+                    let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
+                    let ctx = $('#carga_hidraulica');
+                    initChartLine(ctx, sortedDates, datasets, false);
                 
                     
-                    // ...
+
                     function centerMapOnDevice(serial) {
                         const marker = markersBySerial[serial];
                         if(marker) {

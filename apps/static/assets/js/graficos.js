@@ -92,17 +92,38 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
     let minValues = datasets.map(dataset => Math.min(...dataset.data.filter(Boolean)));
     let minValue = Math.min(...minValues);
 
-    // Verificar se o elemento já possui um gráfico associado a ele
+    // 1. Extraia a configuração de yAxes para uma variável
+    const yAxesConfig = [{
+        gridLines: {
+            lineWidth: 3,
+            color: 'gray',
+            zeroLineColor: 'gray'
+        },
+        ticks: {
+            beginAtZero: false,
+            min: minValue - 20,
+            callback: function(value) {
+                if (!(value % 10)) {
+                    return value + ' mca';
+                }
+            }
+        }
+    }];
+
     let existingChart = $($chartElement).data('chart');
 
     if (existingChart) {
-        // Se já possui, atualizar o gráfico em vez de criar um novo
         existingChart.data.labels = labels;
         existingChart.data.datasets = datasets.map(dataset => ({
             ...dataset,
             fill: false,
             borderWidth: 3
         }));
+
+        // 2. Atualize também as opções de escala
+        existingChart.options.scales.yAxes = yAxesConfig;
+        
+        // 3. Chame update() no gráfico existente
         existingChart.update();
         return existingChart;
     } else {
