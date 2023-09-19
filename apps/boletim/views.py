@@ -91,12 +91,12 @@ class JSON_Boletim_pdf(Boletim_fluid):
 
 class Boletim_ada(View):
 
-    def post(self,resquest):
+    def get(self,request):
         context = {}
 
-        return render(resquest, 'boletim/ada/boletim-ada.html', context)
+        return render(request, 'boletim/ada/boletim-ada.html', context)
 
-    def get(self,resquest):
+    def post(self,request):
 
         context = {}
 

@@ -14,6 +14,7 @@ urlpatterns = [
     path('boletim-pdf-fluid/', Boletim_pdf.as_view(), name='boletim-pdf-fluid'),
     path("boletim-ada/", Boletim_ada.as_view(), name="boletim-ada"),
 
+    # Pages
     path('', views.index, name='home'),
     re_path(r'^.*\.*', views.pages, name='pages'),
     ]
