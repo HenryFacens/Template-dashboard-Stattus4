@@ -86,6 +86,12 @@ function initChartpie($chartElement, labels, data, colors,legend_onoff = true,  
 
     $chartElement.data('chart', ordersChart);
 }
+function randomRGB() {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgb(${r}, ${g}, ${b})`;
+}
 
 function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
 
@@ -117,7 +123,9 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
         existingChart.data.datasets = datasets.map(dataset => ({
             ...dataset,
             fill: false,
-            borderWidth: 3
+            borderWidth: 3,
+            pointRadius: 4,  // Adiciona pontos aos valores
+            pointBackgroundColor: dataset.data.map(() => randomRGB())
         }));
 
         // 2. Atualize também as opções de escala
@@ -150,6 +158,8 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
                 },
                 tooltips: {
                     callbacks: {
+                        mode: 'point',      // Define a exibição do tooltip apenas para o ponto sob o mouse
+                        intersect: true,    // Garante que apenas o ponto sob o mouse seja destacado
                         label: function(item, data) {
                             var label = data.datasets[item.datasetIndex].label || '';
                             var yLabel = item.yLabel;
@@ -168,7 +178,9 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
                 datasets: datasets.map(dataset => ({
                     ...dataset,
                     fill: false,
-                    borderWidth: 3
+                    borderWidth: 3,
+                    pointRadius: 4,  // Adiciona pontos aos valores
+                    pointBackgroundColor: dataset.data.map(() => randomRGB())  // Gera uma cor aleatória para cada ponto
                 }))
             }
         });

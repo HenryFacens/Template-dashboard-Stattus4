@@ -92,7 +92,10 @@ class JSON_Boletim_pdf(Boletim_fluid):
 class Boletim_ada(View):
 
     def get(self,request):
+        
         context = {}
+
+        context['form'] = DateForm()
 
         return render(request, 'boletim/ada/boletim-ada.html', context)
 

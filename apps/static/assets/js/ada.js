@@ -183,26 +183,37 @@ function sendSectorIdToBackend(sectorId) {
                         .openPopup();
                         markersBySerial[device.serial_number] = marker;  // Adiciona o marcador ao dicionário usando serial_number como chave
 
-                            marker.on('click', function() {
-                                const deviceConn = data.devices_conn.find(conn => conn.device_id === device.device_id);
-                                let heatmapData = {};
-                                
-                                // Preenche todos os últimos 7 dias com 0 por padrão
-                                for (let i = 0; i < 7; i++) {
-                                    const date = new Date(new Date().getTime() - i * 24 * 60 * 60 * 1000);
-                                    const formattedDate = date.toISOString().split('T')[0];
-                                    heatmapData[new Date(formattedDate).getTime() / 1000] = 0;
+                        marker.on('click', function() {
+                            const deviceConn = data.devices_conn.find(conn => conn.device_id === device.device_id);
+                            let heatmapData = {};
+                            
+                            // Preenche todos os últimos 7 dias com 0 por padrão
+                            for (let i = 0; i < 7; i++) {
+                                const date = new Date(new Date().getTime() - i * 24 * 60 * 60 * 1000);
+                                const formattedDate = date.toISOString().split('T')[0];
+                                heatmapData[new Date(formattedDate).getTime() / 1000] = 0;
+                            }
+                            
+                            if (deviceConn) {
+                                for (let date in deviceConn.communications) {
+                                    heatmapData[new Date(date).getTime() / 1000] = deviceConn.communications[date] > 0 ? 1 : 0;
                                 }
-                                
-                                if (deviceConn) {
-                                    for (let date in deviceConn.communications) {
-                                        heatmapData[new Date(date).getTime() / 1000] = deviceConn.communications[date] > 0 ? 1 : 0;
-                                    }
-                                }
-                                
-                                // Atualiza o Cal-Heatmap com os novos dados
-                                cal.update(heatmapData);
-                            });
+                            }
+                            
+                            // Atualiza o Cal-Heatmap com os novos dados
+                            cal.update(heatmapData);
+                            
+                            // *** Trecho adicionado para atualizar o gráfico ***
+                            
+                            // Constrói os datasets e filtra com base no serial_number do dispositivo clicado
+                            let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
+                            const filteredDatasets = filterDatasetsBySerialNumber(device.serial_number, datasets);
+                            
+                            // Atualiza o gráfico
+                            let ctx = $('#carga_hidraulica');
+                            initChartLine(ctx, sortedDates, filteredDatasets, false);
+                        
+                        });
 
                         markersGroup.addLayer(marker);
 
@@ -344,14 +355,32 @@ function sendSectorIdToBackend(sectorId) {
                             map.setView(marker.getLatLng(), 17);
                             marker.openPopup();
                         }
-                    
+                        
                         let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
                         const filteredDatasets = filterDatasetsBySerialNumber(serial, datasets);
-                    
+                        
                         let ctx = $('#carga_hidraulica');
                         initChartLine(ctx, sortedDates, filteredDatasets, false);
-                    }
                     
+                        const deviceConn = data.devices_conn.find(conn => conn.serial_number === serial);  // Ajuste isso se o serial não for o mesmo que device_id
+                        let heatmapData = {};
+                    
+                        // Preenche todos os últimos 7 dias com 0 por padrão
+                        for (let i = 0; i < 7; i++) {
+                            const date = new Date(new Date().getTime() - i * 24 * 60 * 60 * 1000);
+                            const formattedDate = date.toISOString().split('T')[0];
+                            heatmapData[new Date(formattedDate).getTime() / 1000] = 0;
+                        }
+                    
+                        if (deviceConn) {
+                            for (let date in deviceConn.communications) {
+                                heatmapData[new Date(date).getTime() / 1000] = deviceConn.communications[date] > 0 ? 1 : 0;
+                            }
+                        }
+                    
+                        // Atualiza o Cal-Heatmap com os novos dados
+                        cal.update(heatmapData);
+                    }
                                 
                         })
                         .catch(error => {
