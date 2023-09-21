@@ -19,7 +19,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # load production server from .env
 ALLOWED_HOSTS = [('*')]
-CSRF_TRUSTED_ORIGINS = ['https://160e-179-175-251-74.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['http://api-hom.stattus4.com:3003/']
 
 
 
