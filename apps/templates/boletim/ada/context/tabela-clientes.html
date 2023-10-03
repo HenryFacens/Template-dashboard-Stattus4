@@ -1,0 +1,40 @@
+<div class="container-fluid">
+    {% comment %} place holder para conseguir os setores {% endcomment %}
+    {% include 'dashboard/ada/context/place-holder.html' %}
+    
+    <div class="container mt-3">
+        <div class="row">
+          <div class="col-lg-7 col-12">
+            <div class="row">
+              <!-- Setores -->
+              <div class="col-lg-6 col-12">
+                <div class="card">
+                  <div class="card-header bg-cinza-stattus4 text-white">
+                    <div class="row align-items-center">
+                      <div class="col-md-6">
+                        <h3 class="mb-0 text-white">Setores</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tabela-1">
+                    <table id="clientTable" class="table align-items-center table-flush">
+                      <tbody>
+                        <!-- Conteúdo da tabela Setores aqui -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <!-- Heatmap -->
+              <div class="col-lg-6 col-12">
+                <div class="d-flex m-3 justify-content-center">
+                  <div id="cal-heatmap"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% comment %} grafico de carga hirdraulica {% endcomment %}
+    {% include "dashboard/ada/context/context_1.html" %} 
+</div>

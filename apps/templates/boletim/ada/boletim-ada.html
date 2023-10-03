@@ -37,7 +37,7 @@
                             {{ form.date_2 }}
                         </div>
                         <div class="mr-2 mb-lg-0 mb-2">
-                            <a href="{% url 'boletim-pdf-fluid' %}" class="btn bg-gradient-primary btn-lg active text-white btn-pdf" target="_blank" role="button" aria-pressed="true">PDF</a>
+                            <a href="{% url 'boletim-pdf-ada' %}" class="btn bg-gradient-primary btn-lg active text-white btn-pdf" target="_blank" role="button" aria-pressed="true">PDF</a>
                         </div>
                     </form>                    
                 </div>
@@ -47,14 +47,14 @@
     </div>
 </div>
 
-
+{% include 'boletim/ada/context/tabela-clientes.html' %}
 
 
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
-
+<script src="\static\assets\js\ada_boletim.js"></script>
 <script src="/static/assets/vendor/chart.js/dist/Chart.min.js"></script>
 <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
 

@@ -152,28 +152,29 @@ def avg_pressure_mvn(cursor, active_device_ids, mvn_hour=4): #certa
     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
     end_date = datetime.datetime.now()
     start_date = end_date - datetime.timedelta(days=30)
-
+    print(end_date)
+    print(start_date)
+    print(device_ids_string)
     query = f"""
-    SELECT
-        dev.serial_number,
-        DATE(d."timestamp") as day_date,
-        AVG(d.single_value) as avg_pressure,
-        p.alt
-    FROM 
-        "4fluid-iot".devices_data d
-    JOIN
-        "4fluid-iot".install_points p ON d.install_point_id = p.id
-    JOIN
-        "4fluid-iot".devices dev ON d.device_id = dev.id
-    WHERE
-        d.device_id IN ({device_ids_string}) AND
-        d."timestamp" BETWEEN '{start_date}' AND '{end_date}' AND
-        EXTRACT(HOUR FROM d."timestamp") = {mvn_hour}
-    GROUP BY
-        dev.serial_number, DATE(d."timestamp"), p.alt
-    ORDER BY
-        dev.serial_number, day_date; 
-
+        SELECT
+            dev.serial_number,
+            DATE(d."timestamp") as day_date,
+            AVG(d.single_value) as avg_pressure,
+            p.alt
+        FROM 
+            "4fluid-iot".devices_data d
+        JOIN
+            "4fluid-iot".install_points p ON d.install_point_id = p.id
+        JOIN
+            "4fluid-iot".devices dev ON d.device_id = dev.id
+        WHERE
+            d.device_id IN ({device_ids_string}) AND
+            d."timestamp" BETWEEN '{start_date}' AND '{end_date}' AND
+            EXTRACT(HOUR FROM d."timestamp") >= 4 AND EXTRACT(HOUR FROM d."timestamp") < 5
+        GROUP BY
+            dev.serial_number, DATE(d."timestamp"), p.alt
+        ORDER BY
+            dev.serial_number, day_date;
     """
     
     cursor.execute(query)
