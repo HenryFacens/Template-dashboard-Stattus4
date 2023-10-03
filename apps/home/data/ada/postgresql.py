@@ -94,7 +94,7 @@ def get_consistency(active_device_ids):
             consistency = "Sem comunicação"
             reason = "Sem comunicação"
         elif pressure_value == 0:
-            consistency = "consistente"
+            consistency = "inconsistente"
             reason = "Valor igual a 0 por muito tempo"
         elif pressure_value < -10:
             consistency = "inconsistente"
@@ -148,10 +148,11 @@ def get_consistency(active_device_ids):
 #         print(f"Error in hydraulic_load_hourly: {e}")
 #         return []
 
-def avg_pressure_mvn(cursor, active_device_ids, mvn_hour=4): #certa 
+def avg_pressure_mvn(cursor, active_device_ids,start_date=None,end_date=None): #certa 
     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
-    end_date = datetime.datetime.now()
-    start_date = end_date - datetime.timedelta(days=30)
+    if start_date is None:
+        end_date = datetime.datetime.now()
+        start_date = end_date - datetime.timedelta(days=30)
     print(end_date)
     print(start_date)
     print(device_ids_string)
@@ -183,15 +184,14 @@ def avg_pressure_mvn(cursor, active_device_ids, mvn_hour=4): #certa
 def hydraulic_load_for_mvn(avg_pressure_mvn_data):
     return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_mvn_data]
 
-def cal_hidraulica(active_device_ids, mvn_hour=4):
+def cal_hidraulica(active_device_ids,date1=None,date2=None):
     try:
         with connections['postgre'].cursor() as cursor:
             # avg_data_daily = avg_pressure_per_day(cursor, active_device_ids) #
             # hydraulic_data_daily = hydraulic_load_hourly(avg_data_daily) #
-
-            avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids, mvn_hour)
+            avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids,date1,date2)
             hydraulic_data_mvn = hydraulic_load_for_mvn(avg_data_mvn)
-        
+
         return {
             # "average_pressure_daily": avg_data_daily,
             # "hydraulic_load_daily": hydraulic_data_daily,

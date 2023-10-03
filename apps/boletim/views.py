@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from apps.home.forms import DateForm
 from apps.home.data.fluid.sql_server import group_clients,total_de_coletas
 from apps.home.data.ada.postgresql import  get_cliente_ativos 
-from apps.home.data.ada.api_ada import get_sector, get_devices
+from apps.home.data.ada.api_ada import get_sector, get_devices_ada
 
 class Boletim_fluid(View):
 
@@ -108,17 +108,17 @@ class Boletim_ada(View):
 
         context = {}
 
-
-        data = json.loads(request.body)
         form = DateForm(request.POST)
+        data = json.loads(request.body)
 
-        
         get_client = data.get("id_cliente", None)
         get_client_sub = data.get("sectorId", None)
+        
         date1 = data.get('date_1', None)
         date2 = data.get('date_2', None)
         date_1_pdf = "/".join(date1.split("-")[::-1]) if date1 else None
         date_2_pdf = "/".join(date2.split("-")[::-1]) if date2 else None
+
         form = DateForm(data={'date_1': date1, 'date_2': date2})
 
         if get_client is not None:
@@ -132,24 +132,24 @@ class Boletim_ada(View):
                 "sector_names":sector_names,
             }
 
-        if get_client_sub is not None:
+        if form.is_valid() :
+            if get_client_sub is not None:
+                date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
+                date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
+                id_cliente = request.session.get('client_id')
 
-            id_cliente = request.session.get('client_id')
+                consistencia_dados, hidraulioc = get_devices_ada(get_client_sub, id_cliente,date1,date2)
 
-            date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
-            date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
-            
-            devices, data_conn, consistencia_dados, hidraulioc = get_devices(get_client_sub, id_cliente)
+                context = {
+                    "sector_names" : None,
+                    "hidraulioc": hidraulioc,
+                    "consistencia_dados":consistencia_dados,
+                    'date_1': date_1_pdf,
+                    'date_2': date_2_pdf,
+                }
+            request.session['context'] = context
 
-            context = {
-                "sector_names" : None,
-                "hidraulioc": hidraulioc,
-                "devices" : devices,
-                "devices_conn":data_conn,
-                "consistencia_dados":consistencia_dados,
-            }
-
-        return JsonResponse(context)
+            return JsonResponse(context)
         
     def process_data(self, request):
 
@@ -165,7 +165,7 @@ class JSON_Boletim_pdf_ada(Boletim_ada):
 
         return JsonResponse({'context': context})
     
-class Boletim_pdf_ada(Boletim_fluid):
+class Boletim_pdf_ada(Boletim_ada):
 
     def get(self, request):
         context = self.process_data(request)

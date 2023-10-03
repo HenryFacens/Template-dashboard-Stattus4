@@ -132,3 +132,32 @@ def print_results(data):
                 print(f"Date: {entry[1]} | Device: {entry[0]} | MVN Hydraulic Load: {entry[2]:.2f}")
             else:
                 print(f"Date: {entry[1]} | Device: {entry[0]} | Error: Missing data")
+
+
+#funcao para pegar os dispositivos e passar para o boletim do ada
+def get_devices_ada(get_client_sub, id_cliente,date1,date2):
+
+    payload = {
+    "clientId": id_cliente,
+    "sectorId": get_client_sub
+    }  
+
+    try:
+        response = requests.post(API_HOST + 'sector/scheme', json=payload)
+
+        data = response.json()
+        dvc_list = data['dvcList']
+
+        active_device_ids = [dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']]
+
+        # print(f"Devices  = {active_device_ids}")
+
+        hidraulioc = cal_hidraulica(active_device_ids,date1,date2)
+        consistencia_dados = get_consistency(active_device_ids)
+
+        return consistencia_dados, hidraulioc
+    
+    except Exception as error:
+        print(f"Error in get_devices: {error}")
+        
+        return None, None, None

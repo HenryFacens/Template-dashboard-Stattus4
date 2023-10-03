@@ -14,7 +14,7 @@ urlpatterns = [
     path('boletim-pdf-fluid/', Boletim_pdf.as_view(), name='boletim-pdf-fluid'),
     path("boletim-ada/", Boletim_ada.as_view(), name="boletim-ada"),
     path('boletim-pdf-ada/', Boletim_pdf_ada.as_view(), name='boletim-pdf-ada'),
-    path('boletim_json_ada/', JSON_Boletim_pdf_ada.as_view(), name='boletim_json'),
+    path('boletim_json_ada/', JSON_Boletim_pdf_ada.as_view(), name='boletim_json_ada'),
 
     # Pages
     path('', views.index, name='home'),
