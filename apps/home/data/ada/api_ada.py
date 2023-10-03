@@ -153,11 +153,36 @@ def get_devices_ada(get_client_sub, id_cliente,date1,date2):
         # print(f"Devices  = {active_device_ids}")
 
         hidraulioc = cal_hidraulica(active_device_ids,date1,date2)
-        consistencia_dados = get_consistency(active_device_ids)
+        # consistencia_dados = get_consistency(active_device_ids)
 
-        return consistencia_dados, hidraulioc
+        return hidraulioc
     
     except Exception as error:
         print(f"Error in get_devices: {error}")
         
         return None, None, None
+    
+def get_alarmes(get_client_sub,id_cliente,date1,date2):
+
+    payload = {
+        "clientId": id_cliente,
+        "sectorId": get_client_sub
+        }
+    try:
+        response = requests.post(API_HOST + 'alarm_note/list_all', json=payload )
+        return response.json()
+    except Exception as error:
+        print(f"erro  = {error}")
+
+def get_press(get_client_sub,id_cliente,date1,date2):
+    payload = {
+        "clientId": id_cliente,
+        "sectorId": get_client_sub,
+        "dtf":date2,
+        "dti":date1,
+        }
+    try:
+        response = requests.post(API_HOST + 'devices_data/sector/pressure_data', json=payload )
+        return response.json()
+    except Exception as error:
+        print(f"erro  = {error}")

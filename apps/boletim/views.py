@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from apps.home.forms import DateForm
 from apps.home.data.fluid.sql_server import group_clients,total_de_coletas
 from apps.home.data.ada.postgresql import  get_cliente_ativos 
-from apps.home.data.ada.api_ada import get_sector, get_devices_ada
+from apps.home.data.ada.api_ada import get_sector, get_devices_ada, get_alarmes, get_press
 
 class Boletim_fluid(View):
 
@@ -138,12 +138,16 @@ class Boletim_ada(View):
                 date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
                 id_cliente = request.session.get('client_id')
 
-                consistencia_dados, hidraulioc = get_devices_ada(get_client_sub, id_cliente,date1,date2)
+                hidraulioc = get_devices_ada(get_client_sub, id_cliente,date1,date2)
+                
+                alarmes = get_alarmes(get_client_sub,id_cliente,date1,date2)
+                pressao = get_press(get_client_sub,id_cliente,date1,date2)
 
                 context = {
+                    "alarmes" : alarmes,
+                    "pressao" : pressao,
                     "sector_names" : None,
                     "hidraulioc": hidraulioc,
-                    "consistencia_dados":consistencia_dados,
                     'date_1': date_1_pdf,
                     'date_2': date_2_pdf,
                 }
