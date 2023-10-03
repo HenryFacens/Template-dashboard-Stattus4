@@ -4,10 +4,10 @@
     
     <div class="container mt-3">
         <div class="row">
-          <div class="col-lg-7 col-12">
+          <div class="col-lg-12 col-12">
             <div class="row">
               <!-- Setores -->
-              <div class="col-lg-6 col-12">
+              <div class="col-lg-12 col-12">
                 <div class="card">
                   <div class="card-header bg-cinza-stattus4 text-white">
                     <div class="row align-items-center">
@@ -19,16 +19,62 @@
                   <div class="tabela-1">
                     <table id="clientTable" class="table align-items-center table-flush">
                       <tbody>
-                        <!-- Conteúdo da tabela Setores aqui -->
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
               <!-- Heatmap -->
-              <div class="col-lg-6 col-12">
-                <div class="d-flex m-3 justify-content-center">
-                  <div id="cal-heatmap"></div>
+              <div class="col-lg-12 col-12">
+                <div class="d-flex justify-content-center">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7">Vazamento</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">Falta de Água</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">Fechamento de registro de rede</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">Mistura de setor</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">Suspeita de fraude</th>
+                                        <th class="text-uppercase text-dark text-xxs font-weight-bolder opacity-7 ps-2">Reparo de vazamento</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alarmData">
+                                    <tr>
+                                        <!-- Vazamento -->
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">0</p>
+
+                                        </td>
+                                        <!-- Falta de Água -->
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">0</p>
+
+                                        </td>
+                                        <!-- Fechamento de registro de rede -->
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">0</p>
+                                        </td>
+                                        <!-- Mistura de setor -->
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">0</p>
+                                        </td>
+                                        <!-- Suspeita de fraude ou usos não medidos -->
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">0</p>
+                                        </td>
+                                        <!-- Reparo de vazamento -->
+                                        <td>
+                                            <p class="text-xs font-weight-bold mb-0">0</p>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                        </div>
+                    </div>
                 </div>
               </div>
             </div>

@@ -116,6 +116,48 @@ function sendSectorIdToBackend(sectorId) {
         let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
         let ctx = $('#carga_hidraulica');
         initChartLine(ctx, sortedDates, datasets, false);
+
+        let vazamentoCount = 0;
+        let faltaAguaCount = 0;
+        let fechamentoRegistroCount = 0;
+        let misturaSetorCount = 0;
+        let suspeitaFraudeCount = 0;
+        let reparoVazamentoCount = 0;
+
+        // Contar os alarmes de cada tipo
+        data.alarmes.forEach(alarm => {
+            switch (alarm.alarmTypeName) {
+                case "Vazamento":
+                    vazamentoCount++;
+                    break;
+                case "Falta de Água":
+                    faltaAguaCount++;
+                    break;
+                case "Fechamento de registro de rede":
+                    fechamentoRegistroCount++;
+                    break;
+                case "Mistura de setor":
+                    misturaSetorCount++;
+                    break;
+                case "Suspeita de fraude ou usos não medidos":
+                    suspeitaFraudeCount++;
+                    break;
+                case "Reparo de vazamento":
+                    reparoVazamentoCount++;
+                    break;
+            }
+        });
+
+        // Definindo a variável alarmDataCells
+        const alarmDataCells = document.querySelectorAll("#alarmData td p");
+
+        // Atualizar a tabela com os totais
+        alarmDataCells[0].textContent = vazamentoCount;
+        alarmDataCells[1].textContent = faltaAguaCount;
+        alarmDataCells[2].textContent = fechamentoRegistroCount;
+        alarmDataCells[3].textContent = misturaSetorCount;
+        alarmDataCells[4].textContent = suspeitaFraudeCount;
+        alarmDataCells[5].textContent = reparoVazamentoCount;
         
         
     })
