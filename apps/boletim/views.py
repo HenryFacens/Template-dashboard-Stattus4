@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from apps.home.forms import DateForm
 from apps.home.data.fluid.sql_server import group_clients,total_de_coletas
-from apps.home.data.ada.postgresql import  get_cliente_ativos 
-from apps.home.data.ada.api_ada import get_sector, get_devices_ada, get_alarmes, get_press
+from apps.home.data.ada.postgresql import  get_cliente_ativos, get_press
+from apps.home.data.ada.api_ada import get_sector, get_devices_ada, get_alarmes
 
 class Boletim_fluid(View):
 
@@ -133,19 +133,21 @@ class Boletim_ada(View):
             }
 
         if form.is_valid() :
+
             if get_client_sub is not None:
+                print(f"aaaaaaaaaaaaaaaaaa = {get_client_sub}")
                 date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
                 date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
                 id_cliente = request.session.get('client_id')
 
-                hidraulioc = get_devices_ada(get_client_sub, id_cliente,date1,date2)
+                hidraulioc,active_device_ids = get_devices_ada(get_client_sub, id_cliente,date1,date2)
                 
-                alarmes = get_alarmes(get_client_sub,id_cliente,date1,date2)
-                pressao = get_press(get_client_sub,id_cliente,date1,date2)
+                alarmes = get_alarmes(get_client_sub,id_cliente)
+                press = get_press(active_device_ids,date1,date2)
 
                 context = {
                     "alarmes" : alarmes,
-                    "pressao" : pressao,
+                    "pressao" : press,
                     "sector_names" : None,
                     "hidraulioc": hidraulioc,
                     'date_1': date_1_pdf,
@@ -153,7 +155,7 @@ class Boletim_ada(View):
                 }
             request.session['context'] = context
 
-            return JsonResponse(context)
+        return JsonResponse(context)
         
     def process_data(self, request):
 

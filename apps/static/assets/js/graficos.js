@@ -93,12 +93,11 @@ function randomRGB() {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
+function initChartLine($chartElement, labels, datasets, legend_onoff = true, showPoints = true) {
 
     let minValues = datasets.map(dataset => Math.min(...dataset.data.filter(Boolean)));
     let minValue = Math.min(...minValues);
 
-    // 1. Extraia a configuração de yAxes para uma variável
     const yAxesConfig = [{
         gridLines: {
             lineWidth: 3,
@@ -124,14 +123,12 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
             ...dataset,
             fill: false,
             borderWidth: 3,
-            pointRadius: 4,  // Adiciona pontos aos valores
+            pointRadius: showPoints ? 4 : 0,  // Adiciona pontos aos valores se showPoints for verdadeiro
             pointBackgroundColor: dataset.data.map(() => randomRGB())
         }));
 
-        // 2. Atualize também as opções de escala
         existingChart.options.scales.yAxes = yAxesConfig;
         
-        // 3. Chame update() no gráfico existente
         existingChart.update();
         return existingChart;
     } else {
@@ -139,27 +136,12 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
             type: 'line',
             options: {
                 scales: {
-                    yAxes: [{
-                        gridLines: {
-                            lineWidth: 3,
-                            color: 'gray',
-                            zeroLineColor: 'gray'
-                        },
-                        ticks: {
-                            beginAtZero: false,
-                            min: minValue - 20,
-                            callback: function(value) {
-                                if (!(value % 10)) {
-                                    return value + ' mca';
-                                }
-                            }
-                        }
-                    }]
+                    yAxes: yAxesConfig
                 },
                 tooltips: {
                     callbacks: {
-                        mode: 'point',      // Define a exibição do tooltip apenas para o ponto sob o mouse
-                        intersect: true,    // Garante que apenas o ponto sob o mouse seja destacado
+                        mode: 'point',
+                        intersect: true,
                         label: function(item, data) {
                             var label = data.datasets[item.datasetIndex].label || '';
                             var yLabel = item.yLabel;
@@ -179,8 +161,8 @@ function initChartLine($chartElement, labels, datasets, legend_onoff = true) {
                     ...dataset,
                     fill: false,
                     borderWidth: 3,
-                    pointRadius: 4,  // Adiciona pontos aos valores
-                    pointBackgroundColor: dataset.data.map(() => randomRGB())  // Gera uma cor aleatória para cada ponto
+                    pointRadius: showPoints ? 4 : 0,  // Adiciona pontos aos valores se showPoints for verdadeiro
+                    pointBackgroundColor: dataset.data.map(() => randomRGB())
                 }))
             }
         });

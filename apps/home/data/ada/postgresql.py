@@ -201,3 +201,39 @@ def cal_hidraulica(active_device_ids,date1=None,date2=None):
     except Exception as e:
         print(f"Error in cal_hidraulica: {e}")
         return {}
+
+def get_press(active_device_ids, start_date, end_date):
+    device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
+    
+    if start_date is None:
+        end_date = datetime.datetime.now()
+        start_date = end_date - datetime.timedelta(days=30)
+    
+    print("End Date:", end_date)
+    print("Start Date:", start_date)
+    print("Device IDs:", device_ids_string)
+
+    with connections['postgre'].cursor() as cursor:
+        query = f"""
+        SELECT d.serial_number, 
+               date_trunc('hour', dd."timestamp") as hour,
+               SUM(dd.single_value) as total_value,
+               COUNT(dd.single_value) as count
+        FROM "4fluid-iot".devices_data dd
+        JOIN "4fluid-iot".devices d ON dd.device_id = d.id
+        WHERE dd.device_id IN ({device_ids_string})
+        AND dd."timestamp" BETWEEN %s AND %s
+        GROUP BY d.serial_number, date_trunc('hour', dd."timestamp")
+        ORDER BY d.serial_number, hour
+        """
+        
+        cursor.execute(query, (start_date, end_date))
+        results = cursor.fetchall()
+
+    # Calculating the average for each serial number and hour
+    averaged_results = [(serial_number, hour, total_value/count) for serial_number, hour, total_value, count in results]
+
+    # for serial_number, hour, avg_value in averaged_results:
+    #     print(f"Serial Number: {serial_number}, Hour: {hour}, Average Value: {avg_value:.2f}")
+
+    return averaged_results

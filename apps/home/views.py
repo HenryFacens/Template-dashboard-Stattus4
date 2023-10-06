@@ -80,7 +80,7 @@ class Ada(View):
             }
             
         if get_client_sub is not None:
-
+            print(f"teste {get_client_sub}")
             id_cliente = request.session.get('client_id')
 
             devices, data_conn, consistencia_dados, hidraulioc = get_devices(get_client_sub, id_cliente)

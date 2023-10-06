@@ -1,4 +1,3 @@
-    // random colors    
 function getRandomColor() {
         const r = Math.floor(Math.random() * 256);
         const g = Math.floor(Math.random() * 256);
@@ -31,27 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-
-            // passando os Setores para a tabela
-            const tableBody = document.getElementById('clientTable').querySelector('tbody');
-            tableBody.innerHTML = '';
-        
-            data.sector_names.forEach(sector => {
-                const row = tableBody.insertRow();
-                const cellSectorName = row.insertCell(0);
-                
-                const sectorButton = document.createElement('button');
-                sectorButton.textContent = sector.sectorName;
-                sectorButton.classList.add('btn', 'btn-link', 'clickable-sector');
-                sectorButton.dataset.sectorId = sector.sectorId;
-                
-                sectorButton.addEventListener('click', function() {
-                    sendSectorIdToBackend(this.dataset.sectorId); // Chamda da funcao para posSetores
-                });
-                
-                cellSectorName.appendChild(sectorButton);
-
-            });
+            console.log(data)
+            const sectorIds = data.sector_names.map(item => item.sectorId);
+            sendSectorIdToBackend(sectorIds)
             
         })
         .catch(error => {
@@ -158,6 +139,47 @@ function sendSectorIdToBackend(sectorId) {
         alarmDataCells[3].textContent = misturaSetorCount;
         alarmDataCells[4].textContent = suspeitaFraudeCount;
         alarmDataCells[5].textContent = reparoVazamentoCount;
+        
+        function buildDatasetss(pressaoData) {
+            let categorizedData = {};
+            let allDates = new Set();
+        
+            pressaoData.forEach(entry => {
+                let serialNumber = entry[0];
+                let date = entry[1];
+                allDates.add(date);
+        
+                if (!categorizedData[serialNumber]) {
+                    categorizedData[serialNumber] = [];
+                }
+                categorizedData[serialNumber].push(entry);
+            });
+        
+            let sortedDatess = [...allDates].sort();
+        
+            let datasetss = [];
+            for (let serialNumber in categorizedData) {
+                let dataMap = new Map(categorizedData[serialNumber].map(entry => [entry[1], entry[2]]));
+                let dataValues = sortedDatess.map(date => dataMap.get(date) || null);
+        
+                let randomColor = getRandomColor();
+        
+                datasetss.push({
+                    label: `Serial Number: ${serialNumber}`,
+                    data: dataValues,
+                    backgroundColor: randomColor,
+                    borderColor: randomColor,
+                    borderWidth: 1
+                });
+            }
+        
+            return { datasetss, sortedDatess };
+        }
+
+        
+        let { datasetss, sortedDatess } = buildDatasetss(data.pressao);
+        let ctxx = $('#serie_pressao');
+        initChartLine(ctxx, sortedDatess, datasetss, false, false);
         
         
     })

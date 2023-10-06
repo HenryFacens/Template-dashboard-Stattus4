@@ -97,7 +97,7 @@
                                 class="d-inline-block align-top"
                                 style="max-height: 76px;" alt>
                         </a>
-                        <h1 class="text-light m-0">Boletim de Medição Mensal</h1>
+                        <h1 class="text-light m-0">Boletim de Medição Mensal - ADA</h1>
                         <div style="width:166px;"></div>
                     </div>
                 </nav>
@@ -137,7 +137,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="chart1">
-                                    <canvas id="grafico_barras_coletas"></canvas>
+                                    <canvas id="grafico_hidraulic"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +154,7 @@
                             <!-- Coluna existente com o gráfico -->
                             <div class="col-md-6">
                                 <div class="chart" id="chart-pizza-container">
-                                    <canvas id="grafico_pizza_amostras"></canvas>
+                                    <canvas id="grafico_press"></canvas>
                                 </div>
                             </div>
                             <div class="col-md-1"></div>
@@ -170,9 +170,9 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="chart2">
-                                    <canvas id="grafico_barras_acuracia"></canvas>
+                                    <canvas id="grafico_alarmes"></canvas>
                                 </div>
-                                <div class="col-md-4">
+                                {% comment %} <div class="col-md-4">
                                     <!-- Tabela estilizada com tamanho de fonte menor -->
                                     <table
                                         class="table table-sm table-striped border rounded shadow">
@@ -180,19 +180,23 @@
                                             style="background-color: #8086C0;">
                                             <tr>
                                                 <th scope="col"
-                                                    class="text-white">Ponto</th>
+                                                    class="text-white">Vazamento</th>
                                                 <th scope="col"
-                                                    class="text-white">Quantidade</th>
-                                                <th scope="col"
-                                                    class="text-white">Porcentagem</th>
-                                            </tr>
+                                                    class="text-white">Falta de Água</th>
+                                                    <th scope="col"
+                                                    class="text-white">Fechamento de Registro de Rede</th>
+                                                    <th scope="col"
+                                                    class="text-white">Mistura de Setor</th>
+                                                    <th scope="col"
+                                                    class="text-white">Suspeita de Fraude</th>
+                                                    <th scope="col"
+                                                    class="text-white">Reparo de Vazamento</th>
                                         </thead>
                                         <tbody id="tabela-valores-pontos">
                                             <tr><td>Termo 1</td><td>10</td></tr>
-                                            <tr><td>Termo 3</td><td>30</td></tr>
                                         </tbody>
                                     </table>
-                                </div>
+                                </div> {% endcomment %}
                             </div>
                         </div>
                     </div>
@@ -207,14 +211,13 @@
                             <div class="row client-info">
                                 <div class="col-md-12">
                                     <h3 class="font-weight-bold text-dark"
-                                        style="font-size: 16px">Amostras
-                                        pendentes de análise do cliente</h3>
+                                        style="font-size: 16px">Total de pontos instalados:</h3>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <p class="text-muted">Pendentes de análise:
-                                        <span id="pendentes_value"></span></p>
+                                    <p class="text-muted">Pontos Instalados:
+                                        <span id="pontos_instalados"></span></p>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +230,7 @@
                                 <div class="col-md-12">
                                     <h3 class="font-weight-bold text-dark"
                                         style="font-size: 16px">Cobrança -
-                                        Mensalidade</h3>
+                                        Mensalidade:</h3>
                                 </div>
                             </div>
                             <div class="row">
@@ -270,6 +273,6 @@
     <script src="/static/assets/vendor/chart.js/dist/Chart.min.js"></script>
     <script src="/static/assets/vendor/chart.js/dist/Chart.extension.js"></script>
     <script src="/static/assets/js/graficos.js"></script>
-    <script src="/static/assets/js/fluid_pdf.js"></script>
+    <script src="/static/assets/js/ada_pdf.js"></script>
 
 </html>

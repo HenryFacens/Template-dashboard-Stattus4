@@ -46,7 +46,7 @@ def transform_conn(data):
 
 def get_sector(id_client):
 
-    # print(f'ID do cliente  = {id_client}')
+    print(f'ID do cliente  = {id_client}')
 
     payload = {
         "clientId": id_client
@@ -135,54 +135,74 @@ def print_results(data):
 
 
 #funcao para pegar os dispositivos e passar para o boletim do ada
-def get_devices_ada(get_client_sub, id_cliente,date1,date2):
+def get_devices_ada(get_client_sub, id_cliente, date1, date2):
+    print(get_client_sub)
+    print(id_cliente)
 
-    payload = {
-    "clientId": id_cliente,
-    "sectorId": get_client_sub
-    }  
+    active_device_ids = []
 
-    try:
-        response = requests.post(API_HOST + 'sector/scheme', json=payload)
-
-        data = response.json()
-        dvc_list = data['dvcList']
-
-        active_device_ids = [dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']]
-
-        # print(f"Devices  = {active_device_ids}")
-
-        hidraulioc = cal_hidraulica(active_device_ids,date1,date2)
-        # consistencia_dados = get_consistency(active_device_ids)
-
-        return hidraulioc
-    
-    except Exception as error:
-        print(f"Error in get_devices: {error}")
-        
-        return None, None, None
-    
-def get_alarmes(get_client_sub,id_cliente,date1,date2):
-
-    payload = {
-        "clientId": id_cliente,
-        "sectorId": get_client_sub
+    for sector_id in get_client_sub:
+        payload = {
+            "clientId": id_cliente,
+            "sectorId": sector_id
         }
-    try:
-        response = requests.post(API_HOST + 'alarm_note/list_all', json=payload )
-        return response.json()
-    except Exception as error:
-        print(f"erro  = {error}")
 
-def get_press(get_client_sub,id_cliente,date1,date2):
-    payload = {
-        "clientId": id_cliente,
-        "sectorId": get_client_sub,
-        "dtf":date2,
-        "dti":date1,
+        try:
+            response = requests.post(API_HOST + 'sector/scheme', json=payload)
+
+            data = response.json()
+            dvc_list = data['dvcList']
+
+            # Adiciona os IDs dos dispositivos ativos do setor atual à lista active_device_ids
+            active_device_ids.extend([dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']])
+
+        except Exception as error:
+            print(f"Error in get_devices for sector {sector_id}: {error}")
+
+    print(f"Devices = {active_device_ids}")
+
+    hidraulioc = cal_hidraulica(active_device_ids, date1, date2)
+    # consistencia_dados = get_consistency(active_device_ids)
+
+    return hidraulioc, active_device_ids
+    
+def get_alarmes(get_client_sub, id_cliente):
+    print(f"dentro de alarmes = {get_client_sub}")
+    alarms_list = []
+
+    for sector_id in get_client_sub:
+        payload = {
+            "clientId": id_cliente,
+            "sectorId": sector_id
         }
-    try:
-        response = requests.post(API_HOST + 'devices_data/sector/pressure_data', json=payload )
-        return response.json()
-    except Exception as error:
-        print(f"erro  = {error}")
+
+        try:
+            response = requests.post(API_HOST + 'alarm_note/list_all', json=payload)
+            alarms_data = response.json()
+            alarms_list.extend(alarms_data)  # Adicione os alarmes do setor atual à lista
+
+        except Exception as error:
+            print(f"Erro em get_alarmes para o setor {sector_id}: {error}")
+
+    return alarms_list
+
+def get_press(get_client_sub, id_cliente, date1, date2):
+    pressure_data_list = []
+
+    for sector_id in get_client_sub:
+        payload = {
+            "clientId": id_cliente,
+            "sectorId": sector_id,
+            "dtf": date2,
+            "dti": date1
+        }
+
+        try:
+            response = requests.post(API_HOST + 'devices_data/sector/pressure_data', json=payload)
+            pressure_data = response.json()
+            pressure_data_list.extend(pressure_data)  # Adicione os dados de pressão do setor atual à lista
+
+        except Exception as error:
+            print(f"Erro em get_press para o setor {sector_id}: {error}")
+
+    return pressure_data_list
