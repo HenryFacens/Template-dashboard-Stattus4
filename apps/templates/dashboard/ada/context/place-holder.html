@@ -4,7 +4,7 @@
         <select name="placeholder" class="form-control" style="width: 200px;" id="id_placeholder">
             <option value="" selected>-----</option>
             {% for cliente_id, cliente_nome in clientes %}
-                <option value="{{ cliente_id }}">{{ cliente_nome }}</option>
+                <option value="{{ cliente_id }}" data-nome="{{ cliente_nome }}">{{ cliente_nome }}</option>
             {% endfor %}
         </select>
     </div>

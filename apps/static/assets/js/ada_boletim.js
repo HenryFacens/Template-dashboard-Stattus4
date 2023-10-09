@@ -4,7 +4,13 @@ function getRandomColor() {
         const b = Math.floor(Math.random() * 256);
         return `rgb(${r}, ${g}, ${b})`;
     }
-
+    function formatDate(inputDate) {
+        let date = new Date(inputDate);
+        let year = date.getUTCFullYear();
+        let month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // padStart ensures we get '01' instead of '1'
+        let day = date.getUTCDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 function getCookie(name) {
     let value = "; " + document.cookie;
     let parts = value.split("; " + name + "=");
@@ -15,17 +21,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     placeholderSelect.addEventListener('change', function() {
         const selectedClientId = this.value;
+        const selectedClientName = this.options[this.selectedIndex].getAttribute('data-nome');
 
-        if (!selectedClientId) return;
+        if (!selectedClientId || !selectedClientName) return;
 
-        fetch('/dash-ada/', {
+        fetch('/boletim-ada/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({ 
-                id_cliente: selectedClientId 
+                id_cliente: selectedClientId,
+                nome_cliente: selectedClientName
                 })
         })
         .then(response => response.json())
@@ -146,13 +154,13 @@ function sendSectorIdToBackend(sectorId) {
         
             pressaoData.forEach(entry => {
                 let serialNumber = entry[0];
-                let date = entry[1];
+                let date = formatDate(entry[1]); // Use the formatDate function here
                 allDates.add(date);
-        
+            
                 if (!categorizedData[serialNumber]) {
                     categorizedData[serialNumber] = [];
                 }
-                categorizedData[serialNumber].push(entry);
+                categorizedData[serialNumber].push([serialNumber, date, entry[2]]);
             });
         
             let sortedDatess = [...allDates].sort();

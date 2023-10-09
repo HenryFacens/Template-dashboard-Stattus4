@@ -112,7 +112,9 @@ class Boletim_ada(View):
         data = json.loads(request.body)
 
         get_client = data.get("id_cliente", None)
+        get_client_name = data.get("nome_cliente", None)
         get_client_sub = data.get("sectorId", None)
+        # print(f"teste get_cliente  = {get_client_name}")
         
         date1 = data.get('date_1', None)
         date2 = data.get('date_2', None)
@@ -126,8 +128,8 @@ class Boletim_ada(View):
             sector_names = get_sector(get_client)
 
             request.session['client_id'] = get_client
-
-            print(sector_names)
+            request.session['nome_cliente'] = get_client_name
+            
             context = {
                 "sector_names":sector_names,
             }
@@ -135,20 +137,25 @@ class Boletim_ada(View):
         if form.is_valid() :
 
             if get_client_sub is not None:
-                print(f"aaaaaaaaaaaaaaaaaa = {get_client_sub}")
+                
+                # print(f"aaaaaaaaaaaaaaaaaa = {get_client_sub}")
                 date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
                 date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
                 id_cliente = request.session.get('client_id')
+                get_client_name = request.session.get('nome_cliente')
 
-                hidraulioc,active_device_ids = get_devices_ada(get_client_sub, id_cliente,date1,date2)
+
+                hidraulioc,active_device_ids,sector_names = get_devices_ada(get_client_sub, id_cliente,date1,date2)
                 
                 alarmes = get_alarmes(get_client_sub,id_cliente)
                 press = get_press(active_device_ids,date1,date2)
-
+                print(f"teste get_cliente  = {get_client_name}")
+                
+                print(sector_names)
                 context = {
                     "alarmes" : alarmes,
                     "pressao" : press,
-                    "sector_names" : None,
+                    "sector_names" : get_client_name,
                     "hidraulioc": hidraulioc,
                     'date_1': date_1_pdf,
                     'date_2': date_2_pdf,
