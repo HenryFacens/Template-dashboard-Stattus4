@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from apps.home.forms import DateForm
 from apps.home.data.fluid.sql_server import group_clients,total_de_coletas
-from apps.home.data.ada.postgresql import  get_cliente_ativos, get_press
-from apps.home.data.ada.api_ada import get_sector, get_devices_ada, get_alarmes
+from apps.home.data.ada.postgresql import  get_cliente_ativos, classify_communication
+from apps.home.data.ada.api_ada import get_sector, get_alarmes, get_devices_ada
 
 class Boletim_fluid(View):
 
@@ -137,7 +137,7 @@ class Boletim_ada(View):
         if form.is_valid() :
 
             if get_client_sub is not None:
-                
+
                 # print(f"aaaaaaaaaaaaaaaaaa = {get_client_sub}")
                 date1 = form.cleaned_data.get('date_1').isoformat() + ' 00:00:00'
                 date2 = form.cleaned_data.get('date_2').isoformat() + ' 23:59:59'
@@ -145,18 +145,19 @@ class Boletim_ada(View):
                 get_client_name = request.session.get('nome_cliente')
 
 
-                hidraulioc,active_device_ids,sector_names = get_devices_ada(get_client_sub, id_cliente,date1,date2)
+                active_device_ids = get_devices_ada(get_client_sub, id_cliente)
                 
+                comunication = classify_communication(active_device_ids,date1,date2)
+
                 alarmes = get_alarmes(get_client_sub,id_cliente)
-                press = get_press(active_device_ids,date1,date2)
-                print(f"teste get_cliente  = {get_client_name}")
                 
-                print(sector_names)
+                # print(f'teste de setores = {sector_names}')
                 context = {
+                    "comunication":comunication,
                     "alarmes" : alarmes,
-                    "pressao" : press,
-                    "sector_names" : get_client_name,
-                    "hidraulioc": hidraulioc,
+                    # "pressao" : press,
+                    "client_name" : get_client_name,
+                    # "hidraulioc": hidraulioc,
                     'date_1': date_1_pdf,
                     'date_2': date_2_pdf,
                 }

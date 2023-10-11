@@ -237,3 +237,60 @@ def get_press(active_device_ids, start_date, end_date):
     #     print(f"Serial Number: {serial_number}, Hour: {hour}, Average Value: {avg_value:.2f}")
 
     return averaged_results
+
+def classify_communication(active_device_ids, start_date, end_date):
+    device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
+    
+    if isinstance(start_date, str):
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+    if isinstance(end_date, str):
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+    if start_date is None:
+        end_date = datetime.datetime.now()
+        start_date = end_date - datetime.timedelta(days=30)
+    
+    print("End Date:", end_date)
+    print("Start Date:", start_date)
+    print("Device IDs:", device_ids_string)
+
+    with connections['postgre'].cursor() as cursor:
+        query = f"""
+        SELECT cr.device_id, 
+               date_trunc('day', cr."timestamp") as communication_day,
+               mdi.created_at as commission_date
+        FROM "4fluid-iot".connectivity_rate cr
+        JOIN "4fluid-iot".meter_device_install_point mdi ON cr.device_id = mdi.device_id
+        WHERE cr.device_id IN ({device_ids_string})
+        AND cr."timestamp" BETWEEN %s AND %s
+        """
+        
+        cursor.execute(query, (start_date, end_date))
+        results = cursor.fetchall()
+
+    # Creating a dictionary to store communication days and commission date for each device
+    device_data = {device_id: {'days': set(), 'commission_date': None} for device_id in active_device_ids}
+    for device_id, communication_day, commission_date in results:
+        device_data[device_id]['days'].add(communication_day)
+        device_data[device_id]['commission_date'] = commission_date
+
+    # Counting the devices based on communication status
+    communicated_count = 0
+    not_communicated_count = 0
+    total_days = (end_date - start_date).days
+    for device_id, data in device_data.items():
+        days_without_communication = total_days - len(data['days'])
+        
+        # Check if the device was commissioned within the date range
+        if data['commission_date'] and data['commission_date'] > start_date:
+            communicated_count += 1
+        elif days_without_communication >= 6 or len(data['days']) == 0:
+            not_communicated_count += 1
+        else:
+            communicated_count += 1
+
+    summary = {
+        communicated_count: "Comunicou",
+        not_communicated_count: "Nao Comunicou"
+    }
+    print(summary)
+    return summary

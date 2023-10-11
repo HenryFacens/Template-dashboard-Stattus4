@@ -147,24 +147,14 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="chart-container smaller-chart rounded mb-1 bg-light p-3 shadow">
-                        <h4 class="header-destaque" style="font-size: 16px; color: white;">Carga Hidráulica</h4>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="chart full-height">
-                                    <canvas id="grafico_hidraulic" class="chart-canvas full-height"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <div class="chart-container smaller-chart rounded mb-2 bg-light p-3 shadow">
-                        <h4 class="header-destaque" style="font-size: 16px; color: white;">Série de Pressão</h4>
+                        <h4 class="header-destaque" style="font-size: 16px; color: white;">Grafico de Dispositivos Conectados</h4>
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="chart full-height">
-                                    <canvas id="grafico_press" class="chart-canvas full-height"></canvas>
+                                <div class="chart">
+                                    <canvas id="grafico_quantidades" class="chart-canvas"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -211,6 +201,46 @@
                 </div>
 
                 <div class="row">
+                    <div class="col-md-6">
+                        <div class="p-3 mb-2 rounded shadow"
+                            style="border: 1px solid black; background-color: #f8f9fa;">
+                            <div class="row client-info">
+                                <div class="col-md-12">
+                                    <h3 class="font-weight-bold text-dark"
+                                        style="font-size: 16px">Quantidade de dispositivos contratados:</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span class="input-group-text">Dispositivos Contratados</span>
+                                    <input type="text" id="valorReais"
+                                        class="btn btn-sm btn-neutral border rounded"
+                                        placeholder="ex: 10 de 10">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 mb-2 rounded shadow"
+                            style="border: 1px solid black; background-color: #f8f9fa;">
+                            <div class="row client-info">
+                                <div class="col-md-12">
+                                    <h3 class="font-weight-bold text-dark"
+                                        style="font-size: 16px">Quantidade de Setores:</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span class="input-group-text">Setores</span>
+                                    <input type="text" id="valorReais"
+                                        class="btn btn-sm btn-neutral border rounded"
+                                        placeholder="ex: 10 de 10">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
 
                     <div class="col-md-6">
                         <div class="p-3 mb-2 rounded shadow"
@@ -223,18 +253,14 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <span class="input-group-text">Pontos Instalados:</span>
-                                    <input type="text" id="valorReais"
-                                        class="btn btn-sm btn-neutral border rounded"
-                                        placeholder="ex: 10 de 10">
-                                    {% comment %} <p class="text-muted">Pontos Instalados:
-                                        <span id="pontos_instalados"></span></p> {% endcomment %}
+                                    <span class="input-group-text">Pontos instalados</span>
+                                        <input type="text" id="pontos"
+                                            class="btn btn-sm btn-neutral border rounded"
+                                            placeholder="ex: 10 de 10">
                                 </div>
-                                
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="p-3 mb-2 rounded shadow"
                             style="border: 1px solid black; background-color: #f8f9fa;">
@@ -242,7 +268,7 @@
                                 <div class="col-md-12">
                                     <h3 class="font-weight-bold text-dark"
                                         style="font-size: 16px">Cobrança -
-                                        Mensalidade:</h3>
+                                        Mensalidade</h3>
                                 </div>
                             </div>
                             <div class="row">
@@ -256,7 +282,6 @@
 
                         </div>
                     </div>
-
                 </div>
 
             </div>
@@ -265,7 +290,7 @@
 
     <footer>
         <div class="container">
-            <div class="p-2 mb-4 rounded shadow"
+            <div class="p-3 mb-4 rounded shadow"
                 style="border: 1px solid black; background-color: #f8f9fa;">
                 <div class="row client-info align-items-center">
                     <div class="col-md-1">

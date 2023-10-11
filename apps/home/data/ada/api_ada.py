@@ -135,12 +135,11 @@ def print_results(data):
 
 
 #funcao para pegar os dispositivos e passar para o boletim do ada
-def get_devices_ada(get_client_sub, id_cliente, date1, date2):
+def get_devices_ada(get_client_sub, id_cliente):
     print(get_client_sub)
     print(id_cliente)
 
     active_device_ids = []
-    sector_names = []
 
     for sector_id in get_client_sub:
         payload = {
@@ -153,20 +152,14 @@ def get_devices_ada(get_client_sub, id_cliente, date1, date2):
 
             data = response.json()
             dvc_list = data['dvcList']
-            sector_name = data.get("sectorName", "")
-            sector_names.append(sector_name)  # Adiciona o nome do setor à lista sector_names
             # Adiciona os IDs dos dispositivos ativos do setor atual à lista active_device_ids
             active_device_ids.extend([dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']])
 
         except Exception as error:
             print(f"Error in get_devices for sector {sector_id}: {error}")
 
-    print(f"Devices = {active_device_ids}")
-
-    hidraulioc = cal_hidraulica(active_device_ids, date1, date2)
-    # consistencia_dados = get_consistency(active_device_ids)
-
-    return hidraulioc, active_device_ids, sector_names
+    
+    return active_device_ids
     
 def get_alarmes(get_client_sub,id_cliente):
     print(f"dentro de{get_client_sub}")

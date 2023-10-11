@@ -84,6 +84,10 @@ class Ada(View):
             id_cliente = request.session.get('client_id')
 
             devices, data_conn, consistencia_dados, hidraulioc = get_devices(get_client_sub, id_cliente)
+            print(f"teste  = {devices}")
+            print(f"teste  = {data_conn}")
+            print(f"teste  = {consistencia_dados}")
+            print(f"teste  = {hidraulioc}")
 
             context = {
                 "sector_names" : None,

@@ -25,7 +25,7 @@ async function fetchData() {
         const data = await response.json();
         console.log(data);
 
-        const cliente = data.context.sector_names;
+        const cliente = data.context.client_name;
         document.getElementById('cliente').textContent = cliente;
 
         const firstDate = data.context.date_1;
@@ -33,88 +33,7 @@ async function fetchData() {
 
         document.getElementById('firstDate2').textContent = firstDate;
         document.getElementById('lastDate2').textContent = lastDate;
-
-
-        function buildDatasets(hidrauliocData) {
-            let categorizedData = {};
-            let allDates = new Set();
-
-            hidrauliocData.forEach(entry => {
-                let sensorId = entry[0];
-                let date = entry[1];
-                allDates.add(date);
-
-                if (!categorizedData[sensorId]) {
-                    categorizedData[sensorId] = [];
-                }
-                categorizedData[sensorId].push(entry);
-            });
-
-            let sortedDates = [...allDates].sort();
-
-            let datasets = [];
-            for (let sensorId in categorizedData) {
-                let dataMap = new Map(categorizedData[sensorId].map(entry => [entry[1], entry[2]]));
-                let dataValues = sortedDates.map(date => dataMap.get(date) || null);
-
-                let randomColor = getRandomColor();
-
-                datasets.push({
-                    label: `Sensor: ${sensorId}`,
-                    data: dataValues,
-                    backgroundColor: randomColor,
-                    borderColor: randomColor,
-                    borderWidth: 1
-                });
-            }
-
-            return { datasets, sortedDates };
-        }
-
-        let { datasets, sortedDates } = buildDatasets(data.context.hidraulioc.mvn_hydraulic_load);
-        let ctx = $('#grafico_hidraulic');
-        initChartLine(ctx, sortedDates, datasets, false);
         
-        function buildDatasetss(pressaoData) {
-            let categorizedData = {};
-            let allDates = new Set();
-        
-            pressaoData.forEach(entry => {
-                let serialNumber = entry[0];
-                let date = formatDate(entry[1]); // Use the formatDate function here
-                allDates.add(date);
-            
-                if (!categorizedData[serialNumber]) {
-                    categorizedData[serialNumber] = [];
-                }
-                categorizedData[serialNumber].push([serialNumber, date, entry[2]]);
-            });
-        
-            let sortedDatess = [...allDates].sort();
-        
-            let datasetss = [];
-            for (let serialNumber in categorizedData) {
-                let dataMap = new Map(categorizedData[serialNumber].map(entry => [entry[1], entry[2]]));
-                let dataValues = sortedDatess.map(date => dataMap.get(date) || null);
-        
-                let randomColor = getRandomColor();
-        
-                datasetss.push({
-                    label: `Serial Number: ${serialNumber}`,
-                    data: dataValues,
-                    backgroundColor: randomColor,
-                    borderColor: randomColor,
-                    borderWidth: 1
-                });
-            }
-        
-            return { datasetss, sortedDatess };
-        }
-
-        
-        let { datasetss, sortedDatess } = buildDatasetss(data.context.pressao);
-        let ctxx = $('#grafico_press');
-        initChartLine(ctxx, sortedDatess, datasetss, false, false);
 
         document.querySelectorAll(".color-box").forEach(box => {
             box.style.backgroundColor = box.getAttribute("data-color");
@@ -185,9 +104,53 @@ async function fetchData() {
             "#A133FF"   // Color for Reparo de vazamento
         ];
 
-        const $chartElement = document.getElementById("grafico_alarmes");  // Assuming you have a canvas element with this ID.
+        const $chartElement = $("#grafico_alarmes");  // Assuming you have a canvas element with this ID.
+        console.log("TESTE")
+
         initChartpie($chartElement, labels, datass, colors, false, "Vazamentos", "bottom");
 
+        var communicationData = data.context.comunication;
+
+        var $chartElemente = $("#grafico_quantidades");  // Substitua pelo ID do seu elemento de gráfico
+        // Processar os dados:
+        var labelss = [];
+        var dataValues = [];
+        var colorss = [];
+
+        for (var key in communicationData) {
+            dataValues.push(key);
+            labelss.push(communicationData[key]);
+            if (communicationData[key] === "Comunicou") {
+                colorss.push('green');
+            } else if (communicationData[key] === "Nao Comunicou") {
+                colorss.push('red');
+            } else {
+                colorss.push('blue');
+            }
+        }
+
+        // Selecione o elemento do gráfico:
+
+        // Verifique se o gráfico já foi inicializado:
+        var existingChart = $chartElemente.data('chart');
+
+        if (existingChart) {
+            // Atualize os dados do gráfico existente:
+            existingChart.data.labels = labelss;
+            existingChart.data.datasets[0].data = dataValues;
+            existingChart.data.datasets[0].backgroundColor = colorss;
+            existingChart.data.datasets[0].borderColor = colorss;
+            existingChart.update();
+        } else {
+            // Inicialize o gráfico:
+            initChartbar($chartElemente, labelss, dataValues, colorss, true, ' ');
+        }
+        
+        var totalDevicesKey = Object.keys(communicationData).find(key => communicationData[key] === "Total de Dispositivos");
+        var totalDevices = totalDevicesKey;
+        
+        document.getElementById("pontos").value = totalDevices;
+        
 
 
     } catch (error) {

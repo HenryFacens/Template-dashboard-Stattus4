@@ -1,16 +1,3 @@
-function getRandomColor() {
-        const r = Math.floor(Math.random() * 256);
-        const g = Math.floor(Math.random() * 256);
-        const b = Math.floor(Math.random() * 256);
-        return `rgb(${r}, ${g}, ${b})`;
-    }
-    function formatDate(inputDate) {
-        let date = new Date(inputDate);
-        let year = date.getUTCFullYear();
-        let month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // padStart ensures we get '01' instead of '1'
-        let day = date.getUTCDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
 function getCookie(name) {
     let value = "; " + document.cookie;
     let parts = value.split("; " + name + "=");
@@ -66,45 +53,7 @@ function sendSectorIdToBackend(sectorId) {
     })
     .then(response => response.json())
     .then(data => {console.log(data)
-        function buildDatasets(hidrauliocData) {
-            let categorizedData = {};
-            let allDates = new Set();
-
-            hidrauliocData.forEach(entry => {
-                let sensorId = entry[0];
-                let date = entry[1];
-                allDates.add(date);
-
-                if (!categorizedData[sensorId]) {
-                    categorizedData[sensorId] = [];
-                }
-                categorizedData[sensorId].push(entry);
-            });
-
-            let sortedDates = [...allDates].sort();
-
-            let datasets = [];
-            for (let sensorId in categorizedData) {
-                let dataMap = new Map(categorizedData[sensorId].map(entry => [entry[1], entry[2]]));
-                let dataValues = sortedDates.map(date => dataMap.get(date) || null);
-
-                let randomColor = getRandomColor();
-
-                datasets.push({
-                    label: `Sensor: ${sensorId}`,
-                    data: dataValues,
-                    backgroundColor: randomColor,
-                    borderColor: randomColor,
-                    borderWidth: 1
-                });
-            }
-
-            return { datasets, sortedDates };
-        }
-
-        let { datasets, sortedDates } = buildDatasets(data.hidraulioc.mvn_hydraulic_load);
-        let ctx = $('#carga_hidraulica');
-        initChartLine(ctx, sortedDates, datasets, false);
+        
 
         let vazamentoCount = 0;
         let faltaAguaCount = 0;
@@ -148,48 +97,30 @@ function sendSectorIdToBackend(sectorId) {
         alarmDataCells[4].textContent = suspeitaFraudeCount;
         alarmDataCells[5].textContent = reparoVazamentoCount;
         
-        function buildDatasetss(pressaoData) {
-            let categorizedData = {};
-            let allDates = new Set();
-        
-            pressaoData.forEach(entry => {
-                let serialNumber = entry[0];
-                let date = formatDate(entry[1]); // Use the formatDate function here
-                allDates.add(date);
-            
-                if (!categorizedData[serialNumber]) {
-                    categorizedData[serialNumber] = [];
-                }
-                categorizedData[serialNumber].push([serialNumber, date, entry[2]]);
-            });
-        
-            let sortedDatess = [...allDates].sort();
-        
-            let datasetss = [];
-            for (let serialNumber in categorizedData) {
-                let dataMap = new Map(categorizedData[serialNumber].map(entry => [entry[1], entry[2]]));
-                let dataValues = sortedDatess.map(date => dataMap.get(date) || null);
-        
-                let randomColor = getRandomColor();
-        
-                datasetss.push({
-                    label: `Serial Number: ${serialNumber}`,
-                    data: dataValues,
-                    backgroundColor: randomColor,
-                    borderColor: randomColor,
-                    borderWidth: 1
-                });
+        // Suponha que você tenha recebido 'data.communication' do lado do servidor:
+        var communicationData = data.comunication;
+
+        // Processar os dados:
+        var labels = [];
+        var dataValues = [];
+        var colors = [];
+
+        for (var key in communicationData) {
+            dataValues.push(key);
+            labels.push(communicationData[key]);
+            if (communicationData[key] === "Comunicou") {
+                colors.push('green');
+            } else if (communicationData[key] === "Nao Comunicou") {
+                colors.push('red');
+            } else {
+                colors.push('blue');
             }
-        
-            return { datasetss, sortedDatess };
         }
 
-        
-        let { datasetss, sortedDatess } = buildDatasetss(data.pressao);
-        let ctxx = $('#serie_pressao');
-        initChartLine(ctxx, sortedDatess, datasetss, false, false);
-        
-        
+        // Inicializar o gráfico:
+        var $chartElement = $("#conexao_dispositivos");  // Substitua pelo ID do seu elemento de gráfico
+        initChartbar($chartElement, labels, dataValues, colors, false, 'Comunicação');
+
     })
     .catch(error => {
         console.error('Erro ao enviar o sectorId:', error);
