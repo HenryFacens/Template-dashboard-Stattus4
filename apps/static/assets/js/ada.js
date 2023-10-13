@@ -307,6 +307,7 @@ function sendSectorIdToBackend(sectorId) {
 
                     // Função que constrói os datasets
                 function buildDatasets(hidrauliocData) {
+                    console.log("aaaaaaaa" + hidrauliocData)
                     let categorizedData = {};
                     let allDates = new Set();
 
@@ -380,11 +381,10 @@ function sendSectorIdToBackend(sectorId) {
                     
                         // Atualiza o Cal-Heatmap com os novos dados
                         cal.update(heatmapData);
-                    }
+                        }
                                 
                         })
                         .catch(error => {
                             console.error('Erro ao enviar o sectorId:', error);
                         });
                     }
-
