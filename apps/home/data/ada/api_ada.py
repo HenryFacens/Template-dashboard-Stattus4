@@ -85,7 +85,7 @@ def get_devices(get_client_sub, id_cliente):
         # print(f"Devices  = {active_device_ids}")
         
         hidraulioc = cal_hidraulica(active_device_ids)
-        # print(f"hidraulioc  = {hidraulioc}")
+        print(f"hidraulioc  = {hidraulioc}")
 
         # Convertendo os dados em DataFrames
         hydraulic_data_mvn_df = pd.DataFrame(hidraulioc['mvn_hydraulic_load'], columns=['device_id', 'date', 'hydraulic_load'])

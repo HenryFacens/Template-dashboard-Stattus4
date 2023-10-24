@@ -1,6 +1,6 @@
 from django.db import connections
 import datetime
-
+import json
 def get_cliente_ativos():
     with connections['postgre'].cursor() as cursor:
         cursor.execute(""" 
@@ -148,11 +148,10 @@ def get_consistency(active_device_ids):
 #         print(f"Error in hydraulic_load_hourly: {e}")
 #         return []
 
-def avg_pressure_mvn(cursor, active_device_ids,start_date=None,end_date=None): #certa 
+def avg_pressure_mvn(cursor, active_device_ids): #certa 
     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
-    if start_date is None:
-        end_date = datetime.datetime.now()
-        start_date = end_date - datetime.timedelta(days=30)
+    end_date = datetime.datetime.now()
+    start_date = end_date - datetime.timedelta(days=30)
 
     query = f"""
         SELECT
@@ -182,21 +181,66 @@ def avg_pressure_mvn(cursor, active_device_ids,start_date=None,end_date=None): #
 def hydraulic_load_for_mvn(avg_pressure_mvn_data):
     return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_mvn_data]
 
+def funcaoAmplitudeHoraria(cursor, active_devices_ids):
 
-def cal_hidraulica(active_device_ids,date1=None,date2=None):
+    devices_id_string = ', '.join([f"'{device_id}'" for device_id in active_devices_ids])
+    end_date = datetime.datetime.now()
+    start_date = end_date - datetime.timedelta(days=30)
+
+    query = f"""
+        WITH HourlyExtremes AS (
+        SELECT
+            DATE(d."timestamp") as day_date,
+            MAX(d.single_value) AS max_pressure,
+            MIN(d.single_value) AS min_pressure
+        FROM 
+            "4fluid-iot".devices_data d
+        WHERE
+            d.device_id IN ({devices_id_string}) AND
+            d."timestamp" BETWEEN '{start_date}' AND '{end_date}'
+        GROUP BY
+            DATE(d."timestamp"), EXTRACT(HOUR FROM d."timestamp")
+    )
+
+    SELECT
+        day_date,
+        (max_pressure - min_pressure) AS amplitude_horaria
+    FROM 
+        HourlyExtremes
+    ORDER BY 
+        day_date;
+        """
+
+    cursor.execute(query)
+    result = cursor.fetchall()
+
+    # Agrupar os resultados por data e calcular a média das amplitudes horárias para cada dia
+    daily_amplitudes = {}
+    for day_date, amplitude in result:
+        if day_date not in daily_amplitudes:
+            daily_amplitudes[day_date] = []
+        daily_amplitudes[day_date].append(amplitude)
+
+    daily_avg_amplitudes = [{'date': str(day), 'amplitude_horaria': sum(amplitudes)/len(amplitudes)} for day, amplitudes in daily_amplitudes.items()]
+
+    return daily_avg_amplitudes
+
+
+
+def cal_hidraulica(active_device_ids):
     try:
         with connections['postgre'].cursor() as cursor:
             # avg_data_daily = avg_pressure_per_day(cursor, active_device_ids) #
             # hydraulic_data_daily = hydraulic_load_hourly(avg_data_daily) #
-            avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids,date1,date2)
+            avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids)
             hydraulic_data_mvn = hydraulic_load_for_mvn(avg_data_mvn)
-            print(f"hydraulic_data_mvn = {hydraulic_data_mvn}")
-
+            amplitudeHoraria = funcaoAmplitudeHoraria(cursor,active_device_ids)
         return {
             # "average_pressure_daily": avg_data_daily,
             # "hydraulic_load_daily": hydraulic_data_daily,
             "mvn_avg_pressure": avg_data_mvn,
-            "mvn_hydraulic_load": hydraulic_data_mvn
+            "mvn_hydraulic_load": hydraulic_data_mvn,
+            "amplitudeHoraria" : amplitudeHoraria,
         }
     except Exception as e:
         print(f"Error in cal_hidraulica: {e}")

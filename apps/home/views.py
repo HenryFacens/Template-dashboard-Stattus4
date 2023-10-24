@@ -87,7 +87,7 @@ class Ada(View):
             # print(f"teste  = {devices}")
             # print(f"teste  = {data_conn}")
             # print(f"teste  = {consistencia_dados}")
-            # print(f"teste  = {hidraulioc}")
+            print(f"teste  = {hidraulioc}")
 
             context = {
                 "correlation_matrix":correlation_matrix,
