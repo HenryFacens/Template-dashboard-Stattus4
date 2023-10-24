@@ -307,7 +307,6 @@ function sendSectorIdToBackend(sectorId) {
 
                     // Função que constrói os datasets
                 function buildDatasets(hidrauliocData) {
-                    console.log("aaaaaaaa" + hidrauliocData)
                     let categorizedData = {};
                     let allDates = new Set();
 
@@ -382,6 +381,72 @@ function sendSectorIdToBackend(sectorId) {
                         // Atualiza o Cal-Heatmap com os novos dados
                         cal.update(heatmapData);
                         }
+                        
+                        const correlationData = JSON.parse(data.correlation_matrix);
+
+                        const matrix = correlationData.data;
+                        const devices = correlationData.columns;
+                        
+                        const svg = d3.select("#heatmappps");
+                        const margin = { top: 200, right: 20, bottom: 0, left: 170 }; // Defina a margem superior
+                        const width = 1000;
+                        const height = 1000;
+                        const gridSize = Math.floor((width - margin.left - margin.right) / devices.length); // Defina gridSize aqui
+
+                        
+                        svg.attr("width", width).attr("height", height);
+                        
+                        // Limpar heatmap anterior
+                        svg.selectAll("*").remove();
+                        
+                        const colorScale = d3.scale.linear()
+                            .domain([-1, 0, 1])
+                            .range(["red", "white", "green"]);
+                        
+                        // Desenhar células
+                        matrix.forEach((row, rowIndex) => {
+                            row.forEach((value, colIndex) => {
+                                svg.append("rect")
+                                    .attr("x", margin.left + colIndex * gridSize)
+                                    .attr("y", margin.top + rowIndex * gridSize) // Ajuste a posição y com base na margin.top
+                                    .attr("width", gridSize)
+                                    .attr("height", gridSize)
+                                    .style("fill", colorScale(value));
+                        
+                                // Adicionar valor em cada célula
+                                svg.append("text")
+                                    .text(value.toFixed(2))
+                                    .attr("x", margin.left + colIndex * gridSize + gridSize / 2)
+                                    .attr("y", margin.top + rowIndex * gridSize + gridSize / 2) // Ajuste a posição y
+                                    .attr("dy", ".32em")
+                                    .style("text-anchor", "middle")
+                                    .style("font-size", "12px");
+                            });
+                        });
+                        
+                        // Rótulos do eixo Y
+                        devices.forEach((device, i) => {
+                            svg.append("text")
+                                .text(device)
+                                .attr("x", margin.left - 10)
+                                .attr("y", margin.top + i * gridSize + gridSize / 2) // Ajuste a posição y
+                                .attr("dy", ".32em")
+                                .attr("text-anchor", "end")
+                                .style("fill", "white");
+                        });
+                        
+                        // Rótulos do eixo X
+                        devices.forEach((device, i) => {
+                            svg.append("text")
+                                .text(device)
+                                .attr("x", margin.left + 75 + i * gridSize + gridSize / 2)
+                                .attr("y", margin.top - 20) // Ajuste a posição y para que fique acima do heatmap
+                                .attr("transform", "rotate(-90," + (margin.left + i * gridSize + gridSize / 2) + "," + (margin.top - 20) + ")")
+                                .style("text-anchor", "middle")
+                                .style("fill", "white");
+                        });
+                        
+                        console.log("Heatmap renderizado com sucesso!");
                                 
                         })
                         .catch(error => {

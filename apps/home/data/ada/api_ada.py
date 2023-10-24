@@ -1,6 +1,7 @@
 
 import requests
 from . postgresql import get_devices_db, get_consistency, cal_hidraulica
+import pandas as pd
 
 API_HOST = "https://api-sistemas.stattus4.com/4fluid/iot/ada/"
 
@@ -81,9 +82,22 @@ def get_devices(get_client_sub, id_cliente):
 
         active_device_ids = [dvc['dvcId'] for dvc in dvc_list if dvc['activeCms']]
 
-        print(f"Devices  = {active_device_ids}")
+        # print(f"Devices  = {active_device_ids}")
         
         hidraulioc = cal_hidraulica(active_device_ids)
+        # print(f"hidraulioc  = {hidraulioc}")
+
+        # Convertendo os dados em DataFrames
+        hydraulic_data_mvn_df = pd.DataFrame(hidraulioc['mvn_hydraulic_load'], columns=['device_id', 'date', 'hydraulic_load'])
+
+        # Reestruturando os dados para que cada dispositivo seja uma coluna
+        pivot_hydraulic_load = hydraulic_data_mvn_df.pivot(index='date', columns='device_id', values='hydraulic_load')
+
+        # Calculando a matriz de correlação para os dados reestruturados
+        correlation_matrix = pivot_hydraulic_load.corr()
+
+        correlation_matrix_json = correlation_matrix.to_json(orient='split')
+
         # print_results(hidraulioc)
         devices_lat_long_comrate = get_devices_db(active_device_ids)
         consistencia_dados = get_consistency(active_device_ids)
@@ -92,7 +106,7 @@ def get_devices(get_client_sub, id_cliente):
         # Dados de comunicacao
         data_conn = transform_conn(devices_lat_long_comrate)
 
-        return devices_lat_long_comrate, data_conn, consistencia_dados, hidraulioc
+        return devices_lat_long_comrate, data_conn, consistencia_dados, hidraulioc, correlation_matrix_json
     
     except Exception as error:
         print(f"Error in get_devices: {error}")

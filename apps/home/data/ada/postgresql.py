@@ -153,9 +153,7 @@ def avg_pressure_mvn(cursor, active_device_ids,start_date=None,end_date=None): #
     if start_date is None:
         end_date = datetime.datetime.now()
         start_date = end_date - datetime.timedelta(days=30)
-    print(end_date)
-    print(start_date)
-    print(device_ids_string)
+
     query = f"""
         SELECT
             dev.serial_number,
@@ -184,6 +182,7 @@ def avg_pressure_mvn(cursor, active_device_ids,start_date=None,end_date=None): #
 def hydraulic_load_for_mvn(avg_pressure_mvn_data):
     return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_mvn_data]
 
+
 def cal_hidraulica(active_device_ids,date1=None,date2=None):
     try:
         with connections['postgre'].cursor() as cursor:
@@ -191,6 +190,7 @@ def cal_hidraulica(active_device_ids,date1=None,date2=None):
             # hydraulic_data_daily = hydraulic_load_hourly(avg_data_daily) #
             avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids,date1,date2)
             hydraulic_data_mvn = hydraulic_load_for_mvn(avg_data_mvn)
+            print(f"hydraulic_data_mvn = {hydraulic_data_mvn}")
 
         return {
             # "average_pressure_daily": avg_data_daily,
@@ -208,10 +208,7 @@ def get_press(active_device_ids, start_date, end_date):
     if start_date is None:
         end_date = datetime.datetime.now()
         start_date = end_date - datetime.timedelta(days=30)
-    
-    print("End Date:", end_date)
-    print("Start Date:", start_date)
-    print("Device IDs:", device_ids_string)
+
 
     with connections['postgre'].cursor() as cursor:
         query = f"""
