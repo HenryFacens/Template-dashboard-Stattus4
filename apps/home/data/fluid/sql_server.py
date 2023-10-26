@@ -1,19 +1,19 @@
-from django.db import connections
+from collections import defaultdict
+from apps.home.data.conectDatabase import DataBase
 import datetime
 
+db = DataBase('sql_server')
 
 # DashBoard Fluid
 
 def get_cliente_ativos():
-    with connections['sql_server'].cursor() as cursor:
-        cursor.execute(""" 
+
+    result = db.execute("""        
         SELECT id_cliente, razao_social
         FROM clientes
-        WHERE ativo = 1;
-                       """)
-        clientes_ativos = cursor.fetchall()
-    # print(clientes_ativos)
-    return clientes_ativos
+        WHERE ativo = 1;""")
+
+    return result
 
 
 def get_dti_dtf():
@@ -40,9 +40,9 @@ def get_amostras_status():
     ids_clientes_str = ",".join(lista_ids_clientes)
     start_str, end_str = get_dti_dtf()
     # print(ids_clientes_str)
-    with connections['sql_server'].cursor() as cursor:
 
-        cursor.execute(f"""
+
+    result = db.execute(f"""
         SELECT 
             id_cliente,
             MONTH(dt_amostra) AS Mes,
@@ -76,13 +76,12 @@ def get_amostras_status():
                 ELSE 'Pontos Confirmados'
             END
         ORDER BY id_cliente, MONTH(dt_amostra), ClassificacaoVazamento;
-        """)
+            """)
         
-        tipo_vazamento = cursor.fetchall()
 
     total_amostras_results = get_total_amostras_por_mes(start_str, end_str)
 
-    merged_results = mesclar_resultados(tipo_vazamento, total_amostras_results,clientes)
+    merged_results = mesclar_resultados(result, total_amostras_results,clientes)
     # print(merged_results)
     final = incorporar_porcentagem_ao_payload(merged_results)
 
@@ -94,11 +93,8 @@ def get_amostras_status():
 
 def get_total_amostras_por_mes(start_date, end_date):
 
-    
-    total_amostras_results = []
 
-    with connections['sql_server'].cursor() as cursor:
-            cursor.execute(f"""
+    result = db.execute(f"""
             SELECT 
                 id_cliente,
                 MONTH(dt_amostra) AS Mes,
@@ -113,10 +109,11 @@ def get_total_amostras_por_mes(start_date, end_date):
             ORDER BY
                 id_cliente,
                 MONTH(dt_amostra);
-    """)
-            
-            results = cursor.fetchall()
-            total_amostras_results.extend(results)
+                """)
+    
+    total_amostras_results = []
+
+    total_amostras_results.extend(result)
 
     return total_amostras_results
 
@@ -197,17 +194,18 @@ def obter_meses_unicos(organizado):
 # Boletim de Medicao Fluid
 
 def clientes_ativos_idmaster():
-    with connections['sql_server'].cursor() as cursor:
-        cursor.execute(""" 
+    
+    result = db.execute("""
         SELECT id_cliente, id_cliente_master, razao_social
         FROM devstattus4_4fluid.dbo.clientes
         WHERE ativo = 1;
-                       """)
-        clientes_ativos = cursor.fetchall()
+    """)
 
-    return clientes_ativos
+
+    return result
 
 def group_clients():
+
     clientes = clientes_ativos_idmaster()
 
     master_clients = {item[0]: {"name": item[2], "sub_clients": []} for item in clientes if item[1] is None and item[0] != 1}
@@ -235,29 +233,26 @@ def group_clients():
     return master_clients
 
 def verifica_subs(id_cliente):
-    with connections['sql_server'].cursor() as cursor:
-        cursor.execute(""" 
-            SELECT 
+
+    result = db.execute(f"""
+                    SELECT 
                 id_cliente
             FROM 
                 devstattus4_4fluid.dbo.clientes
             WHERE 
-                id_cliente_master = %s;
-                       """, [id_cliente])
-        subs = cursor.fetchall()
+                id_cliente_master = '{id_cliente}';
+    """)
 
-    subs_list = [str(item[0]) for item in subs]
 
-    # Add the original id_cliente to the front of the list
+    subs_list = [str(item[0]) for item in result]
+
     subs_list.insert(0, str(id_cliente))
     
     ids_clientes_str = ','.join(subs_list)
-    # print(ids_clientes_str)
+
     return ids_clientes_str
 
 
-
-from collections import defaultdict
 
 def total_de_coletas(id_cliente, date_1, date_2):
 
@@ -266,8 +261,7 @@ def total_de_coletas(id_cliente, date_1, date_2):
     pontos = classificao_boletim(subs, date_1, date_2)
     classes = qnt_class(subs, date_1, date_2)
 
-    with connections['sql_server'].cursor() as cursor:
-        cursor.execute(f""" 
+    result = db.execute(f"""
             SELECT 
                 id_cliente,
                 CAST(dt_amostra AS DATE) AS Dia,
@@ -283,12 +277,11 @@ def total_de_coletas(id_cliente, date_1, date_2):
             ORDER BY
                 id_cliente,
                 CAST(dt_amostra AS DATE);
-                       """)
-        coletas_totais = cursor.fetchall()
+                """)
 
     # Convertendo as datas para formato ISO e agrupando os valores
     sumByDate = defaultdict(int)
-    for item in coletas_totais:
+    for item in result:
         id_cliente, date, total = item
         if isinstance(date, datetime.date):
             date = date.isoformat()
@@ -302,9 +295,10 @@ def total_de_coletas(id_cliente, date_1, date_2):
 
 
 def classificao_boletim(subs, date_1, date_2):
-    with connections['sql_server'].cursor() as cursor:
-        cursor.execute(f""" 
-        SELECT 
+
+
+    result = db.execute(f"""
+                SELECT 
             id_cliente,
             MONTH(dt_amostra) AS Mes,
             CASE 
@@ -336,9 +330,7 @@ def classificao_boletim(subs, date_1, date_2):
                 WHEN v.tipo_vazamento = 'Sem Ponto Suspeito, ' THEN 'Ponto Não Confirmado'
                 ELSE 'Pontos Confirmados'
             END
-        ORDER BY MONTH(dt_amostra), ClassificacaoVazamento;
-        """)
-        pontos = cursor.fetchall()
+        ORDER BY MONTH(dt_amostra), ClassificacaoVazamento;""")
 
     somas = {                    
                     
@@ -347,7 +339,7 @@ def classificao_boletim(subs, date_1, date_2):
         'Pendente': 0
     }
 
-    for _, _, tipo, valor in pontos:
+    for _, _, tipo, valor in result:
         somas[tipo] += valor
         
     return somas
@@ -355,10 +347,8 @@ def classificao_boletim(subs, date_1, date_2):
 
 def qnt_class(subs, date_1, date_2):
         
-
-        with connections['sql_server'].cursor() as cursor:
-            cursor.execute(f""" 
-                SELECT 
+        result = db.execute(f"""
+                    SELECT 
                     id_cliente,
                     SUM(CASE WHEN classificacao = 'FRAU' THEN 1 ELSE 0 END) AS Fraude,
                     SUM(CASE WHEN classificacao = 'INCO' THEN 1 ELSE 0 END) AS Inconsistente,
@@ -375,16 +365,15 @@ def qnt_class(subs, date_1, date_2):
                     dt_amostra BETWEEN '{date_1}' AND '{date_2}'
                 GROUP BY 
                     id_cliente;
-                        """)
-            qnt_class = cursor.fetchall()
+                    """)
 
-        if not qnt_class:
+        if not result:
             print("No data found.")
             return []
 
-        total_values = [0] * (len(qnt_class[0]) - 1)
+        total_values = [0] * (len(result[0]) - 1)
 
-        for record in qnt_class:
+        for record in result:
             for index, value in enumerate(record[1:]):
                 total_values[index] += value
 

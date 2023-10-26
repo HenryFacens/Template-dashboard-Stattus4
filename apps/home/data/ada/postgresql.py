@@ -1,37 +1,37 @@
-from django.db import connections
 import datetime
-import json
+from apps.home.data.conectDatabase import DataBase
+
+db = DataBase('postgre')
+
+
 def get_cliente_ativos():
-    with connections['postgre'].cursor() as cursor:
-        cursor.execute(""" 
+
+    result = db.execute(""" 
         SELECT id, trading_name
         FROM clients
         WHERE active = true AND trading_name <> 'Cliente Demonstração ';;
                        """)
-        clientes_ativos = cursor.fetchall()
 
-    return clientes_ativos
+    return result
 
 
 def get_regioes(id_cliente):
 
-    with connections['postgre'].cursor() as cursor:
-        cursor.execute(f"""
-            SELECT id, neighborhood 
+
+    result  = db.execute(f"""            SELECT id, neighborhood 
             FROM "4fluid-iot".install_points 
-            WHERE client_id = { id_cliente};
-                       """)
-        subs_clientes = cursor.fetchall()
-    # print(subs_clientes)
-    return subs_clientes
+            WHERE client_id = { id_cliente};""")
+    
+    return result
 
 
 def get_devices_db(active_device_ids):
 
     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
-    with connections['postgre'].cursor() as cursor:
-        cursor.execute(f"""
-            SELECT 
+    
+    
+    result = db.execute(f"""
+                SELECT 
                 d.id AS device_id, 
                 d.install_point_id, 
                 d."type",
@@ -46,12 +46,9 @@ def get_devices_db(active_device_ids):
             LEFT JOIN "4fluid-iot".connectivity_rate AS cr ON d.id = cr.device_id AND cr."timestamp" > current_date - interval '7 days'
             LEFT JOIN "4fluid-iot".install_points AS ip ON d.install_point_id = ip.id
             WHERE d.id IN ({device_ids_string})
-        """)
-        
-        combined_info = cursor.fetchall()
-    # print(f'COMBINEDDATAAAAAAAAAAAAA {combined_info}')
+            """)
 
-    combined_data = [
+    data = [
         {
             "device_id": info[0], 
             "install_point_id": info[1], 
@@ -63,30 +60,27 @@ def get_devices_db(active_device_ids):
             "communication_day": info[7],
             "conn_rate": info[8],
             "timestamp": info[9],
-        } for info in combined_info
+        } for info in result
     ]
-    # print(f'COMBINEDDATAAAAAAAAAAAAA {combined_data}')  
 
-    return combined_data
+    return data
 
 def get_consistency(active_device_ids):
+
+
     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
 
-    with connections['postgre'].cursor() as cursor:
-        cursor.execute(f"""
+    result = db.execute(f"""            
             SELECT 
                 d.serial_number,
                 dd.single_value
             FROM "4fluid-iot".devices_data AS dd
             JOIN "4fluid-iot".devices AS d ON d.id = dd.device_id
-            WHERE dd.device_id IN ({device_ids_string}) AND dd."timestamp" > current_date - interval '1 day'
-        """)
-
-        data_values = cursor.fetchall()
+            WHERE dd.device_id IN ({device_ids_string}) AND dd."timestamp" > current_date - interval '1 day'""")
 
     consistency_data = {}
 
-    for data in data_values:
+    for data in result:
         serial_number = data[0]
         pressure_value = data[1]
 
@@ -113,43 +107,7 @@ def get_consistency(active_device_ids):
 
     return consistency_data
 
-
-# def avg_pressure_per_day(cursor, active_device_ids): #Errada
-#     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
-#     end_date = datetime.datetime.now()
-#     start_date = end_date - datetime.timedelta(days=30)
-
-#     query = f"""
-#     SELECT
-#         d.device_id,
-#         DATE(d."timestamp") as day_date,
-#         AVG(d.single_value) as avg_pressure,
-#         p.alt
-#     FROM 
-#         "4fluid-iot".devices_data d
-#     JOIN
-#         "4fluid-iot".install_points p ON d.install_point_id = p.id
-#     WHERE
-#         d.device_id IN ({device_ids_string}) AND
-#         d."timestamp" BETWEEN '{start_date}' AND '{end_date}'
-#     GROUP BY
-#         d.device_id, DATE(d."timestamp"), p.alt
-#     ORDER BY
-#         d.device_id, day_date;
-#     """
-    
-#     cursor.execute(query)
-#     return cursor.fetchall()
-
-# def hydraulic_load_hourly(avg_pressure_data):
-#     try:
-#         return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_data]
-#     except Exception as e:
-#         print(f"Error in hydraulic_load_hourly: {e}")
-#         return []
-
-def avg_pressure_mvn(cursor, active_device_ids): #certa 
-    device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
+def avg_pressure_mvn(cursor, device_ids_string): #certa 
     end_date = datetime.datetime.now()
     start_date = end_date - datetime.timedelta(days=30)
 
@@ -181,63 +139,40 @@ def avg_pressure_mvn(cursor, active_device_ids): #certa
 def hydraulic_load_for_mvn(avg_pressure_mvn_data):
     return [(entry[0], entry[1], (entry[2] or 0) + (entry[3] or 0)) for entry in avg_pressure_mvn_data]
 
-def funcaoAmplitudeHoraria(cursor, active_devices_ids):
+def funcaoAmplitudeHoraria(data, zmax=None):
+    
+    # Crie um dicionário para armazenar os valores máximos e mínimos para cada data
+    date_extremes = {}
+    
+    for _, date, value in data:
+        if date not in date_extremes:
+            date_extremes[date] = {"max": value, "min": value}
+        else:
+            date_extremes[date]["max"] = max(date_extremes[date]["max"], value)
+            if zmax is not None:  # Se zmax for fornecido
+                date_extremes[date]["min"] = min(zmax, value)
+            else:  # Se zmax não for fornecido, continue como antes
+                date_extremes[date]["min"] = min(date_extremes[date]["min"], value)
 
-    devices_id_string = ', '.join([f"'{device_id}'" for device_id in active_devices_ids])
-    end_date = datetime.datetime.now()
-    start_date = end_date - datetime.timedelta(days=30)
-
-    query = f"""
-        WITH HourlyExtremes AS (
-        SELECT
-            DATE(d."timestamp") as day_date,
-            MAX(d.single_value) AS max_pressure,
-            MIN(d.single_value) AS min_pressure
-        FROM 
-            "4fluid-iot".devices_data d
-        WHERE
-            d.device_id IN ({devices_id_string}) AND
-            d."timestamp" BETWEEN '{start_date}' AND '{end_date}'
-        GROUP BY
-            DATE(d."timestamp"), EXTRACT(HOUR FROM d."timestamp")
-    )
-
-    SELECT
-        day_date,
-        (max_pressure - min_pressure) AS amplitude_horaria
-    FROM 
-        HourlyExtremes
-    ORDER BY 
-        day_date;
-        """
-
-    cursor.execute(query)
-    result = cursor.fetchall()
-
-    # Agrupar os resultados por data e calcular a média das amplitudes horárias para cada dia
-    daily_amplitudes = {}
-    for day_date, amplitude in result:
-        if day_date not in daily_amplitudes:
-            daily_amplitudes[day_date] = []
-        daily_amplitudes[day_date].append(amplitude)
-
-    daily_avg_amplitudes = [{'date': str(day), 'amplitude_horaria': sum(amplitudes)/len(amplitudes)} for day, amplitudes in daily_amplitudes.items()]
-
-    return daily_avg_amplitudes
+    # Calcule a amplitude para cada dia e coloque-a em uma lista de dicionários
+    amplitude_dicts = []
+    for date, extremes in date_extremes.items():
+        amplitude = extremes["max"] - extremes["min"]
+        amplitude_dicts.append({"date": date, "amplitude": amplitude})
+    
+    return amplitude_dicts
 
 
+def cal_hidraulica(active_device_ids,zmax):
 
-def cal_hidraulica(active_device_ids):
+    device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
+
     try:
-        with connections['postgre'].cursor() as cursor:
-            # avg_data_daily = avg_pressure_per_day(cursor, active_device_ids) #
-            # hydraulic_data_daily = hydraulic_load_hourly(avg_data_daily) #
-            avg_data_mvn = avg_pressure_mvn(cursor, active_device_ids)
+        with db.get_cursor() as cursor:
+            avg_data_mvn = avg_pressure_mvn(cursor, device_ids_string)
             hydraulic_data_mvn = hydraulic_load_for_mvn(avg_data_mvn)
-            amplitudeHoraria = funcaoAmplitudeHoraria(cursor,active_device_ids)
+            amplitudeHoraria = funcaoAmplitudeHoraria(hydraulic_data_mvn,zmax)
         return {
-            # "average_pressure_daily": avg_data_daily,
-            # "hydraulic_load_daily": hydraulic_data_daily,
             "mvn_avg_pressure": avg_data_mvn,
             "mvn_hydraulic_load": hydraulic_data_mvn,
             "amplitudeHoraria" : amplitudeHoraria,
@@ -246,40 +181,8 @@ def cal_hidraulica(active_device_ids):
         print(f"Error in cal_hidraulica: {e}")
         return {}
 
-def get_press(active_device_ids, start_date, end_date):
-    device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
-    
-    if start_date is None:
-        end_date = datetime.datetime.now()
-        start_date = end_date - datetime.timedelta(days=30)
-
-
-    with connections['postgre'].cursor() as cursor:
-        query = f"""
-        SELECT d.serial_number, 
-               date_trunc('hour', dd."timestamp") as hour,
-               SUM(dd.single_value) as total_value,
-               COUNT(dd.single_value) as count
-        FROM "4fluid-iot".devices_data dd
-        JOIN "4fluid-iot".devices d ON dd.device_id = d.id
-        WHERE dd.device_id IN ({device_ids_string})
-        AND dd."timestamp" BETWEEN %s AND %s
-        GROUP BY d.serial_number, date_trunc('hour', dd."timestamp")
-        ORDER BY d.serial_number, hour
-        """
-        
-        cursor.execute(query, (start_date, end_date))
-        results = cursor.fetchall()
-
-    # Calculating the average for each serial number and hour
-    averaged_results = [(serial_number, hour, total_value/count) for serial_number, hour, total_value, count in results]
-
-    # for serial_number, hour, avg_value in averaged_results:
-    #     print(f"Serial Number: {serial_number}, Hour: {hour}, Average Value: {avg_value:.2f}")
-
-    return averaged_results
-
 def classify_communication(active_device_ids, start_date, end_date):
+    
     device_ids_string = ', '.join([f"'{device_id}'" for device_id in active_device_ids])
     
     if isinstance(start_date, str):
@@ -290,38 +193,29 @@ def classify_communication(active_device_ids, start_date, end_date):
         end_date = datetime.datetime.now()
         start_date = end_date - datetime.timedelta(days=30)
     
-    print("End Date:", end_date)
-    print("Start Date:", start_date)
-    print("Device IDs:", device_ids_string)
 
-    with connections['postgre'].cursor() as cursor:
-        query = f"""
+    results = db.execute(f"""
         SELECT cr.device_id, 
                date_trunc('day', cr."timestamp") as communication_day,
                mdi.created_at as commission_date
         FROM "4fluid-iot".connectivity_rate cr
         JOIN "4fluid-iot".meter_device_install_point mdi ON cr.device_id = mdi.device_id
         WHERE cr.device_id IN ({device_ids_string})
-        AND cr."timestamp" BETWEEN %s AND %s
-        """
-        
-        cursor.execute(query, (start_date, end_date))
-        results = cursor.fetchall()
+        AND cr."timestamp" BETWEEN '{start_date}' AND '{end_date}'
+    """)
 
-    # Creating a dictionary to store communication days and commission date for each device
+
     device_data = {device_id: {'days': set(), 'commission_date': None} for device_id in active_device_ids}
     for device_id, communication_day, commission_date in results:
         device_data[device_id]['days'].add(communication_day)
         device_data[device_id]['commission_date'] = commission_date
 
-    # Counting the devices based on communication status
     communicated_count = 0
     not_communicated_count = 0
     total_days = (end_date - start_date).days
     for device_id, data in device_data.items():
         days_without_communication = total_days - len(data['days'])
         
-        # Check if the device was commissioned within the date range
         if data['commission_date'] and data['commission_date'] > start_date:
             communicated_count += 1
         elif days_without_communication >= 6 or len(data['days']) == 0:
@@ -333,5 +227,5 @@ def classify_communication(active_device_ids, start_date, end_date):
         communicated_count: "Comunicou",
         not_communicated_count: "Nao Comunicou"
     }
-    print(summary)
+
     return summary

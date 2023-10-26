@@ -451,13 +451,14 @@ function sendSectorIdToBackend(sectorId) {
                         let labelsAmplitude = data.hidraulioc.amplitudeHoraria.map(item => item.date);
                         let datasetsAmplitude = [{
                             label: 'Amplitude Horária',
-                            data: data.hidraulioc.amplitudeHoraria.map(item => item.amplitude_horaria),
+                            data: data.hidraulioc.amplitudeHoraria.map(item => item.amplitude), // Ajustado para 'amplitude'
                             borderColor: 'blue' // ou qualquer outra cor de sua escolha
                         }];
-
+                        
                         // Utilizar a função initChartLine
                         let $chartElementAmplitude = $('#carga_horaria'); // Assuma que você tenha um elemento de gráfico com o ID especificado
                         initChartLine($chartElementAmplitude, labelsAmplitude, datasetsAmplitude, false, true);
+                        
 
 
                         })
