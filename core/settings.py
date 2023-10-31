@@ -19,7 +19,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # load production server from .env
 ALLOWED_HOSTS = [('*')]
-CSRF_TRUSTED_ORIGINS = ['https://432e-2804-1b1-fa00-f18f-959f-402e-952a-219b.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://002f-2804-38a-a220-22ed-1dc0-1964-5ac9-ef81.ngrok-free.app']
 
 
 
