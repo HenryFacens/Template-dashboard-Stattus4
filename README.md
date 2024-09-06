@@ -1,19 +1,25 @@
-# Dashboard Django para Stattus4
+# Django Dashboard for Stattus4
 
-## Introdução
+![Stattus4 Logo](img/home.png)
 
-Este projeto é um painel (dashboard) desenvolvido com Django, um framework web em Python. O painel é projetado para a Stattus4, oferecendo uma interface web para visualizar, monitorar e gerenciar dados coletados de sensores e dispositivos conectados em uma rede de cidade inteligente.
+## Introduction
 
-## Funcionalidades
+This project is a dashboard developed with Django, a Python web framework. The dashboard is designed for Stattus4, providing a web interface to visualize, monitor, and manage data collected from sensors and devices connected to a smart city network.
 
-- **Visualização de Dados:** Interface gráfica para exibir dados coletados de sensores em tempo real.
-- **Filtragem e Busca:** Ferramentas para filtrar e buscar dados específicos.
-- **Autenticação de Usuários:** Sistema de login e controle de acesso.
-- **Configuração de Dispositivos:** Interface para adicionar, atualizar e remover dispositivos conectados.
-- **Relatórios e Gráficos:** Geração de relatórios e gráficos com base nos dados coletados.
+## Features
 
-## Requisitos
+- **Data Visualization:** Graphical interface to display real-time data collected from sensors.
+- **Filtering and Search:** Tools to filter and search for specific data.
+- **User Authentication:** Login system and access control.
+- **Device Configuration:** Interface to add, update, and remove connected devices.
+- **Reports and Charts:** Generation of reports and charts based on collected data.
 
-- Python 3.8 ou superior
-- Django 3.2 ou superior
-- PostgreSQL (ou outro banco de dados relacional compatível com Django)
+## Requirements
+
+- Python 3.8 or higher
+- Django 3.2 or higher
+- PostgreSQL (or another relational database compatible with Django)
+
+![Stattus4 Logo](img/dash.png)
+
+![Stattus4 Logo](img/dash_1.png)
